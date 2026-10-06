@@ -21,7 +21,7 @@ agentscripts/
 │   ├── downloads/            # Download shell scripts
 │   └── <category>/
 ├── AGENTS.md                 # This file
-├── CHANGELOG.md
+├── .workspace/CHANGELOG.md   # repo-level changelog (not notebooks/scripts)
 ├── TODO.md
 └── Makefile                  # Delegates to notebooks/ and scripts/ Makefiles
 ```
@@ -139,7 +139,7 @@ There are **three** changelogs. Each tracks only its own area:
 |---|---|
 | `notebooks/CHANGELOG.md` | Every notebook added, changed, or fixed |
 | `scripts/CHANGELOG.md` | Every script added, changed, or fixed |
-| `CHANGELOG.md` (root) | Repo-level changes only (structure, tooling, Makefiles, AGENTS) — NOT notebooks or scripts |
+| `.workspace/CHANGELOG.md` | Repo-level changes only (structure, tooling, Makefiles, AGENTS) — NOT notebooks or scripts |
 
 **Rule:** before staging anything under `notebooks/` → update `notebooks/CHANGELOG.md`. Before staging anything under `scripts/` → update `scripts/CHANGELOG.md`. Never put notebook/script entries in the root changelog.
 

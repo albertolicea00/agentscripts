@@ -25,3 +25,4 @@ build/
 # ── Workspace internal ────────────────────────────────────────
 .workspace/*
 !.workspace/.gitkeep
+!.workspace/CHANGELOG.md
