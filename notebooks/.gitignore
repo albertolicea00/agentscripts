@@ -1,0 +1,27 @@
+# ── Jupyter ───────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# ── Sync state ────────────────────────────────────────────────
+.sync-colab/.state/
+.sync-colab/*.lock
+.sync-colab/.env
+
+# ── Downloaded binaries (never commit output, only notebooks) ─
+**/*.iso
+**/*.zip
+**/*.7z
+**/*.rar
+**/*.cso
+**/*.pbp
+**/*.mkv
+**/*.mp4
+**/*.avi

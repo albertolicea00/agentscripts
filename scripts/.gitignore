@@ -1,0 +1,21 @@
+# ── Sync state ────────────────────────────────────────────────
+.sync-vps/.state/
+.sync-vps/*.lock
+.sync-vps/.env
+
+# ── Script output dirs (not the scripts themselves) ───────────
+output/
+tmp/
+**/output/
+**/tmp/
+
+# ── Downloaded binaries ───────────────────────────────────────
+**/*.iso
+**/*.zip
+**/*.7z
+**/*.rar
+**/*.cso
+**/*.mkv
+**/*.mp4
+**/*.avi
+**/*.ts
