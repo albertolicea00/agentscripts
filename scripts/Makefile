@@ -1,0 +1,53 @@
+.PHONY: help setup-vps pull-vps push-vps
+
+SYNC_VPS  = .sync-vps
+ENV_VPS   = $(SYNC_VPS)/.env
+
+# Auto-discover all .sh files (excluding hidden dirs like .sync-vps)
+SCRIPTS := $(shell find . -name "*.sh" -not -path "*/\.*" | sed 's|^\./||' | sort)
+
+help:
+	@echo ""
+	@echo "  Sync (.sync-vps)"
+	@printf "    \033[36m%-28s\033[0m %s\n" "setup-vps" "Copy .env.example → .sync-vps/.env"
+	@printf "    \033[36m%-28s\033[0m %s\n" "pull-vps"  "Pull scripts from VPS → local"
+	@printf "    \033[36m%-28s\033[0m %s\n" "push-vps"  "Push local scripts → VPS"
+	@echo ""
+	@echo "  Scripts"
+	@if [ -z "$(SCRIPTS)" ]; then \
+		echo "    (none yet)"; \
+	else \
+		for s in $(SCRIPTS); do \
+			name=$$(basename "$$s" .sh); \
+			dir=$$(dirname "$$s" | sed 's|^\./||'); \
+			desc=$$(grep -m1 '^#[^!]' "$$s" 2>/dev/null | sed 's/^# *//; s/ *$$//'); \
+			[ -z "$$desc" ] && desc="(no description)"; \
+			printf "    \033[36mrun-%-24s\033[0m \033[90m%s/\033[0m %s\n" "$$name" "$$dir" "$$desc"; \
+		done; \
+	fi
+
+# ── VPS sync ─────────────────────────────────────────────────────────────────
+
+setup-vps:
+	@if [ -f $(ENV_VPS) ]; then \
+		echo ".sync-vps/.env already exists — skipping."; \
+	else \
+		cp $(SYNC_VPS)/.env.example $(ENV_VPS); \
+		echo "Created $(ENV_VPS) — fill in VPS details before running pull-vps/push-vps."; \
+	fi
+
+pull-vps:
+	@bash $(SYNC_VPS)/pull.sh
+
+push-vps:
+	@bash $(SYNC_VPS)/push.sh
+
+# ── Dynamic script runner ─────────────────────────────────────────────────────
+
+run-%:
+	@script=$$(find . -name "$*.sh" -not -path "*/\.*" | head -1); \
+	if [ -z "$$script" ]; then \
+		echo "No script named '$*.sh' found under scripts/"; exit 1; \
+	fi; \
+	echo "Running: $$script"; \
+	bash "$$script"
