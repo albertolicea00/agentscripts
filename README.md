@@ -1,57 +1,60 @@
-# collab-notebooks
+# agentscripts
 
-Collection of Google Colab notebooks organized by category, with sync tooling to keep Drive and GitHub in sync.
+Collection of Google Colab notebooks and local shell scripts, organized by category.
 
 ## Structure
 
 ```
-collab-notebooks/
-├── src/                    # Notebooks, grouped by category
-│   ├── downloads/          # Scrapers and batch downloaders
-│   └── <category>/         # Add folders as needed
-├── sync/                   # Drive ↔ GitHub sync scripts
-├── scripts/                # Helper CLI scripts
-├── docs/
-│   └── NOTEBOOKS.md        # Index of all available notebooks
-├── TODO.md                 # Informal backlog — ideas and things to add
-└── CHANGELOG.md            # Change history
+agentscripts/
+├── notebooks/                    # Google Colab notebooks
+│   ├── .sync-colab/              # Drive ↔ GitHub sync scripts
+│   ├── downloads/                # Scrapers and batch downloaders
+│   └── <category>/               # Add folders as needed
+├── scripts/                      # Local shell scripts
+│   └── downloads/                # Local downloaders
+├── TODO.md                       # Backlog
+└── CHANGELOG.md                  # Change history
 ```
-
-### `src/`
-
-Every notebook lives under `src/<category>/`. Category is whatever makes sense for the task — `downloads`, `media`, `data`, `ml`, etc.
-
-### `sync/`
-
-Scripts to pull notebooks from Google Drive into this repo and push local changes back up. Run these to stay in sync without doing it by hand.
-
-| Script | Auth | Purpose |
-|---|---|---|
-| `sync/pull.ipynb` | OAuth (Colab) | Download Drive notebooks → `src/` |
-| `sync/push.ipynb` | OAuth (Colab) | Upload `src/` notebooks → Drive |
-| `sync/pull.sh` | Service account | Same, runs locally / CI (`make pull`) |
-| `sync/push.sh` | Service account | Same, runs locally / CI (`make push`) |
-
-### `scripts/`
-
-Standalone Python/shell scripts that support the notebooks (not notebooks themselves).
 
 ## Quickstart
 
-1. Open any notebook from `src/` in Google Colab.
-2. Run all cells top to bottom.
-3. Optional last cell: mount Drive and copy output there.
+```bash
+make help          # list all commands from both notebooks/ and scripts/
+```
 
-## Sync
+### Open a notebook in Colab
 
-Two options:
-- **Colab** (OAuth): open `sync/pull.ipynb` or `sync/push.ipynb` in Colab and run.
-- **Local / CI** (service account): `make pull` or `make push`. Copy `sync/.env.example` → `sync/.env` and set credentials first (`make setup`).
+```bash
+make open-romsfun  # PSP ROM downloader
+make open-hls      # HLS / obfuscated stream downloader
+make open-ytdlp    # yt-dlp video downloader
+```
+
+### Run a local script
+
+```bash
+make run-hls-local   # HLS downloader (local, requires ffmpeg)
+make run-dl-tubi     # Tubi progressive MP4 downloader
+```
+
+### Sync notebooks between Drive and GitHub
+
+```bash
+make setup         # first-time: create notebooks/.sync-colab/.env from template
+make pull          # Drive → repo (shell, service account)
+make push          # repo → Drive (shell, service account)
+make pull-colab    # open pull notebook in Colab (OAuth)
+make push-colab    # open push notebook in Colab (OAuth)
+```
 
 ## Notebooks
 
-See [docs/NOTEBOOKS.md](docs/NOTEBOOKS.md) for the full index.
+See [notebooks/README.md](notebooks/README.md) for the full index.
+
+## Scripts
+
+See [scripts/README.md](scripts/README.md) for the full index.
 
 ## Backlog
 
-Ideas and notebooks to add live in [TODO.md](TODO.md). Drop things there as they come up.
+[TODO.md](TODO.md) — drop ideas here as they come up.

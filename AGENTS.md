@@ -4,126 +4,152 @@ Instructions for AI agents working in this repository.
 
 ## Repository Purpose
 
-Google Colab notebooks organized by category under `src/`, plus `sync/` scripts for Drive ↔ GitHub synchronization.
+`agentscripts` holds two kinds of automation:
+- **`notebooks/`** — Google Colab notebooks, organized by category, with Drive sync tooling in `.sync-colab/`
+- **`scripts/`** — Local shell scripts, organized by category, runnable via `make run-<name>`
 
-## Structure Rules
+## Structure
 
-- **All notebooks go under `src/<category>/`** — never at the repo root or directly in `src/`.
-- Category names are lowercase, hyphen-separated: `downloads`, `data-processing`, `ml-training`, etc.
-- Sync scripts live in `sync/` — two Colab notebooks (`.ipynb`) and two shell scripts (`.sh`).
-- Helper Python/shell scripts live in `scripts/`.
+```
+agentscripts/
+├── notebooks/
+│   ├── .sync-colab/          # Drive ↔ GitHub sync (ipynb + sh)
+│   ├── downloads/            # Download notebooks
+│   └── <category>/
+├── scripts/
+│   ├── .sync-vps/            # VPS ↔ local sync (rsync over SSH)
+│   ├── downloads/            # Download shell scripts
+│   └── <category>/
+├── AGENTS.md                 # This file
+├── CHANGELOG.md
+├── TODO.md
+└── Makefile                  # Delegates to notebooks/ and scripts/ Makefiles
+```
+
+Each subfolder has its own `AGENTS.md`, `README.md`, and `Makefile` scoped to that area.
 
 ## When Adding a Notebook
 
-1. Place it at `src/<appropriate-category>/<descriptive-name>.ipynb`.
-2. Add an entry to `docs/NOTEBOOKS.md` under the correct category section.
-3. Add an entry to `CHANGELOG.md` under today's date.
-4. If it came from `TODO.md`, check off or remove that item.
+1. Place at `notebooks/<category>/<name>.ipynb`.
+2. Add a row to `notebooks/README.md` under the correct category.
+3. Add an `open-<name>` target to `notebooks/Makefile` and a forwarding entry in the root `Makefile`.
+4. Add an entry to `CHANGELOG.md` under today's date.
+5. Check off or remove the item from `TODO.md` if applicable.
+
+## When Adding a Script
+
+1. Place at `scripts/<category>/<name>.sh`. Make it executable (`chmod +x`).
+2. First non-shebang line must be a `# <short description>` comment — shown in `make help`.
+3. Add a row to `scripts/README.md`.
+4. Add an entry to `CHANGELOG.md`. The `run-<name>` target in `scripts/Makefile` is auto-generated — no Makefile edit needed.
 
 ## Notebook Conventions
 
 ### Required header (second cell, markdown)
 
-Every notebook must have a markdown cell immediately after `pip install` with this structure:
-
 ```markdown
-# <Notebook Title> — <one-line description>
+# <Title> — <one-line description>
 
-<2–3 sentence summary of what it does.>
+<2–3 sentence summary.>
 
 ---
 
 ## Source
-
-- **Site:** <URL of the site being scraped/used>
-- **Section / category:** <where to find content on that site>
-- **How to find URLs:** <explain what kind of URL the user should paste>
+- **Site / tool:** <URL>
+- **How to find input:** <what to paste in the widget>
 
 ## What it does
-
-Numbered list of steps the notebook performs, end to end.
+Numbered steps end to end.
 
 ## How to use
-
-Numbered list of cells in order — what each one does and what the user must do between them.
+Numbered cell-by-cell instructions.
 
 ## Known limitations
-
-Anything that breaks silently, edge cases, Colab-specific gotchas (disconnect timeout, JS-rendered pages, rate limiting, etc.)
+Silent failures, Colab gotchas, rate limits, etc.
 
 ## Output
-
-Folder tree showing where files land on Drive.
+Folder tree showing Drive destination.
 ```
 
-- **No hardcoded user input** — anything the user supplies (URLs, IDs, file paths) must go through a UI widget, not a hardcoded list. Use `ipywidgets.Textarea` for multi-line input, `ipywidgets.Text` for single values.
-- Last cell: mount Drive and copy output to `CollabMedia/<category>/<notebook-name>/`. This cell is required, not optional.
-- Colab temp output goes to `/content/<category>/<notebook-name>/` during the run.
-- Use `cloudscraper` for sites with Cloudflare protection.
+### Rules
+
+- **No hardcoded user input.** URLs, IDs, file paths → `ipywidgets.Textarea` / `ipywidgets.Text`. Widget starts empty.
+- **Drive output required** (last cell): copy to `MyDrive/CollabMedia/<category>/<notebook-name>/`.
+- Colab temp output to `/content/<category>/<notebook-name>/`.
+- Use `cloudscraper` for Cloudflare-protected sites.
+- Widget pattern:
+  ```python
+  import ipywidgets as widgets
+  from IPython.display import display
+  box = widgets.Textarea(value="", placeholder="One per line",
+                         layout=widgets.Layout(width="100%", height="200px"))
+  display(widgets.Label("Label:"), box)
+  # next cell:
+  items = [x.strip() for x in box.value.splitlines() if x.strip()]
+  ```
 
 ### Drive output structure
-
-Mirrors `src/` exactly under `MyDrive/CollabMedia/`:
 
 ```
 MyDrive/CollabMedia/
 ├── downloads/
-│   └── romsfun/        ← output of src/downloads/romsfun.ipynb
+│   ├── romsfun/         ← notebooks/downloads/romsfun.ipynb
+│   ├── hls-colab/       ← notebooks/downloads/hls-colab.ipynb
+│   └── ytdlp-2drive/    ← notebooks/downloads/ytdlp-2drive.ipynb
 └── <category>/
     └── <notebook-name>/
 ```
 
-### UI widget pattern
+## Script Conventions
 
-```python
-import ipywidgets as widgets
-from IPython.display import display
+- Shebang: `#!/usr/bin/env bash`
+- Second line: `# <short description>` — appears in `make help`
+- `set -euo pipefail` on the third line
+- No hardcoded paths — use env vars or positional args
+- Deps checked at top with clear error messages
 
-input_box = widgets.Textarea(
-    value="",
-    placeholder="One item per line",
-    layout=widgets.Layout(width="100%", height="200px"),
-)
-display(widgets.Label("Label:"), input_box)
-```
+## Sync
 
-Then in the next cell: `items = [x.strip() for x in input_box.value.splitlines() if x.strip()]`
+### `notebooks/.sync-colab/` — Drive ↔ GitHub
 
-## Sync Scripts (`sync/`)
-
-Two interfaces, same operation:
-
-| Script | Auth | When to use |
+| Script | Auth | When |
 |---|---|---|
-| `pull.ipynb` | OAuth (interactive) | Running inside Colab |
-| `push.ipynb` | OAuth (interactive) | Running inside Colab |
-| `pull.sh` | Service account JSON | Local machine / CI |
-| `push.sh` | Service account JSON | Local machine / CI |
+| `pull.ipynb` | Colab OAuth | Inside Colab |
+| `push.ipynb` | Colab OAuth | Inside Colab |
+| `pull.sh` | Service account JSON | Local / CI |
+| `push.sh` | Service account JSON | Local / CI |
 
-- Credentials never committed — configure via `sync/.env` (copy from `sync/.env.example`).
-- Run via `make pull` / `make push` (shell) or `make pull-colab` / `make push-colab` (opens Colab in browser).
+Config via `notebooks/.sync-colab/.env` (copy from `.env.example`, run `make setup`).
 
-## What Not to Commit
+### `scripts/.sync-vps/` — VPS ↔ local
 
-- Downloaded binaries (`.iso`, `.zip`, `.rar`, etc.) — gitignored.
-- OAuth tokens or service account keys — gitignored.
-- Notebook outputs (`.ipynb_checkpoints`) — gitignored.
+| Script | What |
+|---|---|
+| `pull.sh` | VPS → local `scripts/` via rsync |
+| `push.sh` | local `scripts/` → VPS via rsync |
 
-## TODO.md
+Config via `scripts/.sync-vps/.env` (copy from `.env.example`, run `make setup-vps`).  
+Requires SSH access and rsync on both ends.
 
-Informal backlog — ideas, notebooks to add, improvements. No structure required. Drop things here as they come up; clean up when done.
+## CHANGELOG (mandatory)
 
-## CHANGELOG Format
+Update before every commit that adds or changes a notebook or script.
 
 ```
 ## YYYY-MM-DD
-- Added: `src/<category>/<file>.ipynb` — short description
-- Fixed: <what>
-- Changed: <what>
+- Added: `notebooks/<category>/<file>.ipynb` — description
+- Added: `scripts/<category>/<file>.sh` — description
+- Fixed/Changed: <what>
 ```
-
-**Updating CHANGELOG is mandatory** before every commit that adds or changes a notebook or script. No push without a CHANGELOG entry. If multiple files change in one commit, one entry per file is enough.
 
 ## Commit attribution
 
-Co-authoring with AI is allowed and encouraged.
+Co-authoring with AI is allowed and encouraged. End commit messages with:
+
+```
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+## TODO.md
+
+Informal backlog. No structure required. Drop ideas, clean up when done.
