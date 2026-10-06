@@ -64,6 +64,6 @@ make push-vps        # local scripts/ → VPS
 
 ## License
 
-[MIT](LICENSE) — Powered by @albertolicea00 and his unstoppable AI‑agents
+[Unlicense](UNLICENSE) — Powered by @albertolicea00 and his unstoppable AI‑agents
 
 > 🤖 Many of these notebooks and scripts are **AI‑generated** and then reviewed & refined by me. The AI proposes, I approve — everything passes through manual review before being used.
