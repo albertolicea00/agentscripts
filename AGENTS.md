@@ -33,7 +33,7 @@ Each subfolder has its own `AGENTS.md`, `README.md`, and `Makefile` scoped to th
 1. Place at `notebooks/<category>/<name>.ipynb`.
 2. Add a row to `notebooks/README.md` under the correct category.
 3. Add an `open-<name>` target to `notebooks/Makefile` and a forwarding entry in the root `Makefile`.
-4. Add an entry to `CHANGELOG.md` under today's date.
+4. Add an entry to `notebooks/CHANGELOG.md` under today's date.
 5. Check off or remove the item from `TODO.md` if applicable.
 
 ## When Adding a Script
@@ -41,7 +41,7 @@ Each subfolder has its own `AGENTS.md`, `README.md`, and `Makefile` scoped to th
 1. Place at `scripts/<category>/<name>.sh`. Make it executable (`chmod +x`).
 2. First non-shebang line must be a `# <short description>` comment — shown in `make help`.
 3. Add a row to `scripts/README.md`.
-4. Add an entry to `CHANGELOG.md`. The `run-<name>` target in `scripts/Makefile` is auto-generated — no Makefile edit needed.
+4. Add an entry to `scripts/CHANGELOG.md`. The `run-<name>` target in `scripts/Makefile` is auto-generated — no Makefile edit needed.
 
 ## Notebook Conventions
 
@@ -131,24 +131,33 @@ Config via `notebooks/.sync-colab/.env` (copy from `.env.example`, run `make set
 Config via `scripts/.sync-vps/.env` (copy from `.env.example`, run `make setup-vps`).  
 Requires SSH access and rsync on both ends.
 
-## CHANGELOG (mandatory)
+## ⚠ CHANGELOG — UPDATE BEFORE EVERY COMMIT
 
-Update before every commit that adds or changes a notebook or script.
+There are **three** changelogs. Each tracks only its own area:
+
+| File | Tracks |
+|---|---|
+| `notebooks/CHANGELOG.md` | Every notebook added, changed, or fixed |
+| `scripts/CHANGELOG.md` | Every script added, changed, or fixed |
+| `CHANGELOG.md` (root) | Repo-level changes only (structure, tooling, Makefiles, AGENTS) — NOT notebooks or scripts |
+
+**Rule:** before staging anything under `notebooks/` → update `notebooks/CHANGELOG.md`. Before staging anything under `scripts/` → update `scripts/CHANGELOG.md`. Never put notebook/script entries in the root changelog.
+
+Format (same in all three):
 
 ```
 ## YYYY-MM-DD
-- Added: `notebooks/<category>/<file>.ipynb` — description
-- Added: `scripts/<category>/<file>.sh` — description
-- Fixed/Changed: <what>
+- Added: `<path>` — short description
+- Changed: `<path>` — what changed and why
+- Fixed: `<path>` — what was broken
+- Removed: `<path>` — why removed
 ```
+
+**No changelog entry = do not commit.** This is the most commonly skipped step.
 
 ## Commit attribution
 
-Co-authoring with AI is allowed and encouraged. End commit messages with:
-
-```
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-```
+Co-authoring with AI is allowed and encouraged. Add a `Co-Authored-By` trailer using your own model name, version, and vendor — do not copy anything from this file.
 
 ## TODO.md
 
