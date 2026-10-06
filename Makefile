@@ -1,30 +1,51 @@
-.PHONY: pull push pull-colab push-colab setup help
+.PHONY: help setup pull push pull-colab push-colab \
+        open-romsfun open-hls open-ytdlp
 
-COLAB_PULL  = sync/pull.ipynb
-COLAB_PUSH  = sync/push.ipynb
-ENV_FILE    = sync/.env
+help: ## Show all commands
+	@echo ""
+	@printf "\033[1m── Notebooks ───────────────────────────────────────\033[0m\n"
+	@$(MAKE) -C notebooks help --no-print-directory
+	@echo ""
+	@printf "\033[1m── Scripts ─────────────────────────────────────────\033[0m\n"
+	@$(MAKE) -C scripts help --no-print-directory
+	@echo ""
 
-help: ## Show available commands
-	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*##"}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
+# ── Notebook targets ──────────────────────────────────────────────────────────
 
-setup: ## Copy .env.example → sync/.env (first time setup)
-	@if [ -f $(ENV_FILE) ]; then \
-		echo "sync/.env already exists — skipping."; \
-	else \
-		cp sync/.env.example $(ENV_FILE); \
-		echo "Created $(ENV_FILE) — fill in your values before running pull/push."; \
-	fi
+setup:
+	@$(MAKE) -C notebooks setup --no-print-directory
 
-pull: ## Pull notebooks from Drive using shell script (requires sync/.env + service account)
-	@bash sync/pull.sh
+pull:
+	@$(MAKE) -C notebooks pull --no-print-directory
 
-push: ## Push src/ notebooks to Drive using shell script (requires sync/.env + service account)
-	@bash sync/push.sh
+push:
+	@$(MAKE) -C notebooks push --no-print-directory
 
-pull-colab: ## Open pull Colab notebook in browser
-	@open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PULL)" \
-	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PULL)"
+pull-colab:
+	@$(MAKE) -C notebooks pull-colab --no-print-directory
 
-push-colab: ## Open push Colab notebook in browser
-	@open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PUSH)" \
-	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PUSH)"
+push-colab:
+	@$(MAKE) -C notebooks push-colab --no-print-directory
+
+open-romsfun:
+	@$(MAKE) -C notebooks open-romsfun --no-print-directory
+
+open-hls:
+	@$(MAKE) -C notebooks open-hls --no-print-directory
+
+open-ytdlp:
+	@$(MAKE) -C notebooks open-ytdlp --no-print-directory
+
+# ── Script targets ────────────────────────────────────────────────────────────
+
+run-%:
+	@$(MAKE) -C scripts run-$* --no-print-directory
+
+setup-vps:
+	@$(MAKE) -C scripts setup-vps --no-print-directory
+
+pull-vps:
+	@$(MAKE) -C scripts pull-vps --no-print-directory
+
+push-vps:
+	@$(MAKE) -C scripts push-vps --no-print-directory
