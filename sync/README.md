@@ -23,7 +23,7 @@ Two interfaces for the same operations:
 | `DRIVE_FOLDER_ID` | ID from Drive URL: `drive.google.com/drive/folders/<ID>` |
 | `GITHUB_TOKEN` | GitHub PAT with `repo` scope |
 | `GITHUB_USER` | `albertolicea00` |
-| `GITHUB_REPO` | `collab-notbooks` |
+| `GITHUB_REPO` | `agentscripts` |
 
 Open in Colab via:
 ```

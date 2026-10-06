@@ -22,9 +22,9 @@ push: ## Push src/ notebooks to Drive using shell script (requires sync/.env + s
 	@bash sync/push.sh
 
 pull-colab: ## Open pull Colab notebook in browser
-	@open "https://colab.research.google.com/github/albertolicea00/collab-notbooks/blob/main/$(COLAB_PULL)" \
-	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/collab-notbooks/blob/main/$(COLAB_PULL)"
+	@open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PULL)" \
+	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PULL)"
 
 push-colab: ## Open push Colab notebook in browser
-	@open "https://colab.research.google.com/github/albertolicea00/collab-notbooks/blob/main/$(COLAB_PUSH)" \
-	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/collab-notbooks/blob/main/$(COLAB_PUSH)"
+	@open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PUSH)" \
+	  2>/dev/null || xdg-open "https://colab.research.google.com/github/albertolicea00/agentscripts/blob/main/$(COLAB_PUSH)"
