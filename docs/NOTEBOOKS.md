@@ -10,7 +10,9 @@ Batch downloaders and scrapers.
 
 | Notebook | Description |
 |---|---|
-| [src/downloads/romsfun.ipynb](src/downloads/romsfun.ipynb) | Scrape and download PSP ROM ISOs from romsfun.com. Bypasses Cloudflare via `cloudscraper`. Optional: copy output to Google Drive. |
+| [src/downloads/romsfun.ipynb](src/downloads/romsfun.ipynb) | Scrape and download PSP ROM ISOs from romsfun.com. Bypasses Cloudflare via `cloudscraper`. Output → `CollabMedia/downloads/romsfun/`. |
+| [src/downloads/hls-colab.ipynb](src/downloads/hls-colab.ipynb) | Download obfuscated HLS streams (TikTok CDN PNG-wrapped segments, standard `.m3u8`, direct MP4). Accepts M3U8 Detector extension JSON. Output → `CollabMedia/downloads/hls-colab/`. |
+| [src/downloads/ytdlp-2drive.ipynb](src/downloads/ytdlp-2drive.ipynb) | Download YouTube (and other sites) via yt-dlp + EJS/PO-token solver. Requires `cookies.txt`. Output → `CollabMedia/downloads/ytdlp-2drive/`. |
 
 ---
 
