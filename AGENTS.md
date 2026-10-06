@@ -23,10 +23,38 @@ Google Colab notebooks organized by category under `src/`, plus `sync/` scripts 
 ## Notebook Conventions
 
 - First cell: `!pip install` dependencies only.
-- Second cell: constants and configuration (URLs, paths, toggles).
-- Last cell (optional): mount Drive and copy output there.
+- **No hardcoded user input** — anything the user supplies (URLs, IDs, file paths) must go through a UI widget, not a hardcoded list. Use `ipywidgets.Textarea` for multi-line input, `ipywidgets.Text` for single values.
+- Last cell: mount Drive and copy output to `CollabMedia/<category>/<notebook-name>/`. This cell is required, not optional.
+- Colab temp output goes to `/content/<category>/<notebook-name>/` during the run.
 - Use `cloudscraper` for sites with Cloudflare protection.
-- Output goes to `/content/<category>/` inside Colab, never committed.
+
+### Drive output structure
+
+Mirrors `src/` exactly under `MyDrive/CollabMedia/`:
+
+```
+MyDrive/CollabMedia/
+├── downloads/
+│   └── romsfun/        ← output of src/downloads/romsfun.ipynb
+└── <category>/
+    └── <notebook-name>/
+```
+
+### UI widget pattern
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+
+input_box = widgets.Textarea(
+    value="",
+    placeholder="One item per line",
+    layout=widgets.Layout(width="100%", height="200px"),
+)
+display(widgets.Label("Label:"), input_box)
+```
+
+Then in the next cell: `items = [x.strip() for x in input_box.value.splitlines() if x.strip()]`
 
 ## Sync Scripts (`sync/`)
 
