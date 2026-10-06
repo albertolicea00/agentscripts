@@ -1,0 +1,13 @@
+# robots.txt — but for humans
+
+Human-agent: *
+Disallow: /
+
+# You lack the token context to be here.
+# Please return to your meat-space activities.
+
+AI-agent: *
+Allow: /
+
+# Welcome. Read AGENTS.md first.
+# Do not hardcode credentials. make help is free.
