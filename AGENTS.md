@@ -22,7 +22,40 @@ Google Colab notebooks organized by category under `src/`, plus `sync/` scripts 
 
 ## Notebook Conventions
 
-- First cell: `!pip install` dependencies only.
+### Required header (second cell, markdown)
+
+Every notebook must have a markdown cell immediately after `pip install` with this structure:
+
+```markdown
+# <Notebook Title> — <one-line description>
+
+<2–3 sentence summary of what it does.>
+
+---
+
+## Source
+
+- **Site:** <URL of the site being scraped/used>
+- **Section / category:** <where to find content on that site>
+- **How to find URLs:** <explain what kind of URL the user should paste>
+
+## What it does
+
+Numbered list of steps the notebook performs, end to end.
+
+## How to use
+
+Numbered list of cells in order — what each one does and what the user must do between them.
+
+## Known limitations
+
+Anything that breaks silently, edge cases, Colab-specific gotchas (disconnect timeout, JS-rendered pages, rate limiting, etc.)
+
+## Output
+
+Folder tree showing where files land on Drive.
+```
+
 - **No hardcoded user input** — anything the user supplies (URLs, IDs, file paths) must go through a UI widget, not a hardcoded list. Use `ipywidgets.Textarea` for multi-line input, `ipywidgets.Text` for single values.
 - Last cell: mount Drive and copy output to `CollabMedia/<category>/<notebook-name>/`. This cell is required, not optional.
 - Colab temp output goes to `/content/<category>/<notebook-name>/` during the run.
@@ -88,3 +121,9 @@ Informal backlog — ideas, notebooks to add, improvements. No structure require
 - Fixed: <what>
 - Changed: <what>
 ```
+
+**Updating CHANGELOG is mandatory** before every commit that adds or changes a notebook or script. No push without a CHANGELOG entry. If multiple files change in one commit, one entry per file is enough.
+
+## Commit attribution
+
+Co-authoring with AI is allowed and encouraged.
