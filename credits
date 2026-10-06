@@ -1,0 +1,15 @@
+# Credits
+
+## AI co-authors
+
+Most notebooks and scripts in this repo were drafted by a model and reviewed by a human before use. Co-author trailers are mandatory for AI-written commits — see the AI co-authorship section in [AGENTS.md](AGENTS.md).
+
+Models that have contributed, with the trailer each uses:
+
+- Co-authored-by: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+Add a row the first time a model contributes. Use the vendor's published trailer identity — never invent an email or a version string.
+
+## Human review
+
+Every notebook and script passes manual review by [@albertolicea00](https://github.com/albertolicea00) before use. The AI proposes, the human approves.
