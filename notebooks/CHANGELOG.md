@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-10-09
+
+- Added: `notebooks/utils/colab-connect.ipynb` — OpenSSH daemon + Cloudflare Tunnel bridge for remote SSH & command execution. Output → `CollabMedia/utils/colab-connect/session.json`.
+
 ## 2026-10-06
 
 - Added: `notebooks/downloads/romsfun.ipynb` — batch PSP ROM downloader from romsfun.com. Widget URL input, cloudscraper, output → `CollabMedia/downloads/romsfun/`.

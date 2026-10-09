@@ -1,9 +1,11 @@
-.PHONY: help setup-vps pull-vps push-vps
+.PHONY: help setup-vps pull-vps push-vps setup-colab connect-colab run-colab
 
-SYNC_VPS  = .sync-vps
-ENV_VPS   = $(SYNC_VPS)/.env
+SYNC_VPS   = .sync-vps
+ENV_VPS    = $(SYNC_VPS)/.env
+COLAB_CONN = .colab-connect
+ENV_COLAB  = $(COLAB_CONN)/.env
 
-# Auto-discover all .sh files (excluding hidden dirs like .sync-vps)
+# Auto-discover all .sh files (excluding hidden dirs like .sync-vps, .colab-connect)
 SCRIPTS := $(shell find . -name "*.sh" -not -path "*/\.*" | sed 's|^\./||' | sort)
 
 help:
@@ -12,6 +14,10 @@ help:
 	@printf "    \033[36m%-28s\033[0m %s\n" "setup-vps" "Copy .env.example → .sync-vps/.env"
 	@printf "    \033[36m%-28s\033[0m %s\n" "pull-vps"  "Pull scripts from VPS → local"
 	@printf "    \033[36m%-28s\033[0m %s\n" "push-vps"  "Push local scripts → VPS"
+	@echo ""
+	@echo "  Colab Connect (.colab-connect)"
+	@printf "    \033[36m%-28s\033[0m %s\n" "setup-colab"   "Setup SSH keys & cloudflared for Colab"
+	@printf "    \033[36m%-28s\033[0m %s\n" "connect-colab" "Connect to active Colab instance via SSH"
 	@echo ""
 	@echo "  Scripts"
 	@if [ -z "$(SCRIPTS)" ]; then \
@@ -41,6 +47,17 @@ pull-vps:
 
 push-vps:
 	@bash $(SYNC_VPS)/push.sh
+
+# ── Colab connect ────────────────────────────────────────────────────────────
+
+setup-colab:
+	@bash $(COLAB_CONN)/setup.sh
+
+connect-colab:
+	@bash $(COLAB_CONN)/connect.sh
+
+run-colab:
+	@bash $(COLAB_CONN)/run.sh $(CMD)
 
 # ── Dynamic script runner ─────────────────────────────────────────────────────
 

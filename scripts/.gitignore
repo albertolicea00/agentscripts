@@ -2,6 +2,7 @@
 .sync-vps/.state/
 .sync-vps/*.lock
 .sync-vps/.env
+.colab-connect/.env
 
 # ── Script output dirs (not the scripts themselves) ───────────
 output/

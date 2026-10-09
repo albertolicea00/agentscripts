@@ -35,25 +35,32 @@ make help            # list all commands
 
 **Open a notebook in Colab:**
 ```bash
-make open-romsfun    # PSP ROM downloader
-make open-hls        # HLS / obfuscated stream downloader
-make open-ytdlp      # yt-dlp video downloader
+make open-romsfun        # PSP ROM downloader
+make open-hls            # HLS / obfuscated stream downloader
+make open-ytdlp          # yt-dlp video downloader
+make open-colab-connect  # SSH bridge notebook for remote connection
 ```
 
 **Run a local script:**
 ```bash
-make run-hls-local   # HLS stream → local MP4 (requires ffmpeg)
-make run-dl-tubi     # Tubi progressive MP4 downloader
+make run-hls-local       # HLS stream → local MP4 (requires ffmpeg)
+make run-dl-tubi         # Tubi progressive MP4 downloader
+```
+
+**Colab SSH & Remote Execution:**
+```bash
+make setup-colab         # first-time: check cloudflared & copy SSH public key
+make connect-colab       # interactive SSH connection to Colab runtime
 ```
 
 **Sync:**
 ```bash
-make setup           # first-time: create notebooks/.sync-colab/.env
-make pull            # Drive → repo
-make push            # repo → Drive
-make setup-vps       # first-time: create scripts/.sync-vps/.env
-make pull-vps        # VPS → local scripts/
-make push-vps        # local scripts/ → VPS
+make setup               # first-time: create notebooks/.sync-colab/.env
+make pull                # Drive → repo
+make push                # repo → Drive
+make setup-vps           # first-time: create scripts/.sync-vps/.env
+make pull-vps            # VPS → local scripts/
+make push-vps            # local scripts/ → VPS
 ```
 
 

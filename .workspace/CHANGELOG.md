@@ -7,6 +7,11 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-10-09
+
+- Added: root Makefile forwarding targets for `open-colab-connect`, `setup-colab`, `connect-colab`, and `run-colab`.
+- Changed: root `README.md` updated with Colab Connect commands and documentation.
+
 ## 2026-10-06
 
 - Changed: migrated to `notebooks/` + `scripts/` two-area structure (`src/` and `sync/` removed)

@@ -23,6 +23,14 @@ Run `make help` from repo root or this folder to see all commands.
 
 ---
 
+## utils
+
+| Notebook | Open | Description |
+|---|---|---|
+| [utils/colab-connect.ipynb](utils/colab-connect.ipynb) | `make open-colab-connect` | OpenSSH daemon + Cloudflare Tunnel bridge for remote SSH & command execution. Output → `CollabMedia/utils/colab-connect/session.json`. |
+
+---
+
 ## .sync-colab
 
 Sync tooling to keep this repo and Google Drive in sync. See [.sync-colab/README.md](.sync-colab/README.md).

@@ -7,6 +7,12 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-10-09
+
+- Added: `scripts/.colab-connect/` — Google Colab SSH bridge and remote execution tooling (`setup.sh`, `connect.sh`, `run.sh` via Cloudflare Tunnel).
+- Changed: `scripts/Makefile` — added `setup-colab`, `connect-colab`, and `run-colab` targets.
+- Changed: `scripts/.gitignore` — ignore `.colab-connect/.env`.
+
 ## 2026-10-06
 
 - Added: `scripts/downloads/dl-tubi.sh` — downloads Tubi progressive MP4 from M3U8 Detector JSON export. Dedupes repeated segment URLs (single file, not real HLS).

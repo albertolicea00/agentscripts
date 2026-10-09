@@ -1,5 +1,5 @@
 .PHONY: help setup pull push pull-colab push-colab \
-        open-romsfun open-hls open-ytdlp
+        open-romsfun open-hls open-ytdlp open-colab-connect
 
 SYNC        = .sync-colab
 ENV_FILE    = $(SYNC)/.env
@@ -52,3 +52,7 @@ open-hls: ## Open HLS/obfuscated stream downloader in Colab
 open-ytdlp: ## Open yt-dlp video downloader in Colab
 	@open "$(COLAB_BASE)/downloads/ytdlp-2drive.ipynb" 2>/dev/null \
 	  || xdg-open "$(COLAB_BASE)/downloads/ytdlp-2drive.ipynb"
+
+open-colab-connect: ## Open Colab SSH bridge notebook in Colab
+	@open "$(COLAB_BASE)/utils/colab-connect.ipynb" 2>/dev/null \
+	  || xdg-open "$(COLAB_BASE)/utils/colab-connect.ipynb"

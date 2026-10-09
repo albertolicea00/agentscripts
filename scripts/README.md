@@ -4,6 +4,7 @@ Local shell scripts organized by category, with VPS sync tooling in `.sync-vps/`
 
 ```
 scripts/
+├── .colab-connect/      # Google Colab SSH bridge & remote execution (Cloudflare Tunnel)
 ├── .sync-vps/           # VPS ↔ local sync (rsync over SSH)
 └── downloads/
     ├── dl-tubi.sh       # Download Tubi progressive MP4 from M3U8 Detector JSON
@@ -20,6 +21,9 @@ make run-hls-local     # run scripts/downloads/hls-local.sh
 make setup-vps         # first-time: create .sync-vps/.env from template
 make pull-vps          # VPS → local scripts/
 make push-vps          # local scripts/ → VPS
+
+make setup-colab       # setup SSH keys & cloudflared for Colab
+make connect-colab     # connect to Colab instance via SSH
 ```
 
 Or from inside this folder:

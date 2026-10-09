@@ -1,5 +1,6 @@
 .PHONY: help setup pull push pull-colab push-colab \
-        open-romsfun open-hls open-ytdlp
+        open-romsfun open-hls open-ytdlp open-colab-connect \
+        setup-colab connect-colab run-colab
 
 help: ## Show all commands
 	@echo ""
@@ -36,6 +37,9 @@ open-hls:
 open-ytdlp:
 	@$(MAKE) -C notebooks open-ytdlp --no-print-directory
 
+open-colab-connect:
+	@$(MAKE) -C notebooks open-colab-connect --no-print-directory
+
 # ── Script targets ────────────────────────────────────────────────────────────
 
 run-%:
@@ -49,3 +53,12 @@ pull-vps:
 
 push-vps:
 	@$(MAKE) -C scripts push-vps --no-print-directory
+
+setup-colab:
+	@$(MAKE) -C scripts setup-colab --no-print-directory
+
+connect-colab:
+	@$(MAKE) -C scripts connect-colab --no-print-directory
+
+run-colab:
+	@$(MAKE) -C scripts run-colab --no-print-directory
