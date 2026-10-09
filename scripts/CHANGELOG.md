@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-10-09
 
+- Added: `scripts/downloads/dl-romsfun-batch.sh` — download retro/PSP ROMs from romsfun.com in batch with Cloudflare bypass, dynamic CDN token resolution & resume.
 - Added: `scripts/.colab-connect/` — Google Colab SSH bridge and remote execution tooling (`setup.sh`, `connect.sh`, `run.sh` via Cloudflare Tunnel).
 - Changed: `scripts/Makefile` — added `setup-colab`, `connect-colab`, and `run-colab` targets.
 - Changed: `scripts/.gitignore` — ignore `.colab-connect/.env`.
