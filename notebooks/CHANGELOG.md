@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-10-09
 
+- Changed: `notebooks/downloads/romsfun.ipynb` — download directly to Google Drive instead of `/content/` temp + copy. Mount Drive in setup cell, removed final copy cell. Better for unstable connections (files survive Colab disconnects).
 - Fixed: `notebooks/downloads/romsfun.ipynb` — updated `find_download_url` with AJAX token resolver (`action=k_get_download`) to avoid downloading intermediate HTML hub pages.
 - Added: `notebooks/utils/colab-connect.ipynb` — OpenSSH daemon + Cloudflare Tunnel bridge for remote SSH & command execution. Output → `CollabMedia/utils/colab-connect/session.json`.
 
