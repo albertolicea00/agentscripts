@@ -157,7 +157,11 @@ Format (same in all three):
 
 ## Commit attribution
 
-Co-authoring with AI is allowed and encouraged. Add a `Co-Authored-By` trailer using your own model name, version, and vendor — do not copy anything from this file.
+Co-authoring with AI is allowed and encouraged.
+When adding a `Co-Authored-By` trailer:
+- Use: `Co-Authored-By: gemini-code-assist-user <gemini-code-assist@google.com>` (or omit trailer).
+- **NEVER** use `<antigravity@google.com>` (as GitHub links that email to an unrelated individual account `shimonenator`).
+- If in doubt, do not add a co-author trailer so only `@albertolicea00` appears as author.
 
 ## TODO.md
 

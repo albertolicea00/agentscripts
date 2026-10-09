@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-10-09
 
+- Changed: `AGENTS.md` commit attribution guidelines updated to use `gemini-code-assist-user` and forbid `<antigravity@google.com>`.
 - Added: root Makefile forwarding targets for `open-colab-connect`, `setup-colab`, `connect-colab`, and `run-colab`.
 - Changed: root `README.md` updated with Colab Connect commands and documentation.
 
