@@ -1,135 +1,38 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 # Resilient Google Drive downloader: folder/split parts, browser cookie sync, range resume & auto-join
-# Usage: ./dl-gdrive-resilient.sh [options] <drive_url_or_id_or_webloc...>
+# Usage: ./dl-gdrive-resilient.py [options] <url_or_id_or_webloc...>
 
-set -euo pipefail
-
-show_help() {
-    cat << 'EOF'
-Usage: dl-gdrive-resilient.sh [options] <url_or_id_or_file...>
-
-Ultra-resilient Google Drive downloader designed for large files and multi-part archives.
-Handles browser authentication, network micro-cuts, automatic Range resuming, and joining.
-
-Inputs:
-  - Google Drive folder URL:   https://drive.google.com/drive/folders/<FOLDER_ID>
-  - Google Drive file URL:     https://drive.google.com/file/d/<FILE_ID>/view
-  - Google Drive .webloc file: path/to/link.webloc (Apple Web Internet Location)
-  - Raw Drive folder or file ID: 1J-2iarladmpT4Tq8715V-VA8H7Ac1e1g
-  - Text file with URLs:       urls.txt (one URL/ID per line)
-
-Options:
-  -o, --out-dir <dir>       Destination directory (default: current dir or $OUT_DIR)
-  -b, --browser <name>      Browser to import cookies from: chrome, safari, firefox, brave, edge (default: chrome)
-  -j, --join [output_file]  Auto-join split parts (part_*.part) into a single file upon completion
-  -p, --pause-after <n>     Pause downloads after completing part N (1-based index or part name)
-  --no-refresh              Disable AppleScript tab reloading (for headless / non-macOS environments)
-  -h, --help                Show this help message
-
-Examples:
-  ./dl-gdrive-resilient.sh "https://drive.google.com/drive/folders/1J-2iarladmpT4Tq8715V-VA8H7Ac1e1g"
-  ./dl-gdrive-resilient.sh -o ~/Downloads/Ubuntu --join ubuntu-24.04.iso ubuntu_split.webloc
-  ./dl-gdrive-resilient.sh --pause-after 3 "https://drive.google.com/drive/folders/<ID>"
-EOF
-    exit 0
-}
-
-OUT_DIR="${OUT_DIR:-.}"
-BROWSER="chrome"
-JOIN_OUTPUT=""
-DO_JOIN=0
-PAUSE_AFTER=""
-NO_REFRESH=0
-INPUTS=()
-
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        -h|--help)
-            show_help
-            ;;
-        -o|--out-dir)
-            OUT_DIR="$2"
-            shift 2
-            ;;
-        -b|--browser)
-            BROWSER="$2"
-            shift 2
-            ;;
-        -j|--join)
-            DO_JOIN=1
-            if [[ $# -gt 1 && ! "$2" =~ ^- ]]; then
-                JOIN_OUTPUT="$2"
-                shift 2
-            else
-                shift 1
-            fi
-            ;;
-        -p|--pause-after)
-            PAUSE_AFTER="$2"
-            shift 2
-            ;;
-        --no-refresh)
-            NO_REFRESH=1
-            shift 1
-            ;;
-        *)
-            INPUTS+=("$1")
-            shift 1
-            ;;
-    esac
-done
-
-if [[ ${#INPUTS[@]} -eq 0 ]]; then
-    echo "Error: Missing input URL, folder ID, or file." >&2
-    echo "Run with --help for usage details." >&2
-    exit 1
-fi
-
-mkdir -p "$OUT_DIR"
-
-command -v python3 >/dev/null 2>&1 || { echo "Error: python3 is required" >&2; exit 1; }
-
-python3 -c "import requests, gdown" >/dev/null 2>&1 || {
-    echo "Installing required Python dependencies (requests, gdown)..."
-    python3 -m pip install -q requests gdown
-}
-
-export OUT_DIR BROWSER DO_JOIN JOIN_OUTPUT PAUSE_AFTER NO_REFRESH
-
-python3 - "${INPUTS[@]}" << 'EOF'
 import os
 import sys
 import time
 import json
 import re
+import argparse
 import plistlib
 import subprocess
 from urllib.parse import urlparse, parse_qs
-import requests
-from gdown.download import _get_session, get_url_from_gdrive_confirmation
-from gdown.__main__ import _import_cookies_from_browser
 
-OUT_DIR = os.path.abspath(os.environ.get("OUT_DIR", "."))
-BROWSER = os.environ.get("BROWSER", "chrome").lower()
-DO_JOIN = os.environ.get("DO_JOIN", "0") == "1"
-JOIN_OUTPUT = os.environ.get("JOIN_OUTPUT", "").strip()
-PAUSE_AFTER = os.environ.get("PAUSE_AFTER", "").strip()
-NO_REFRESH = os.environ.get("NO_REFRESH", "0") == "1"
+# Check third-party dependencies and offer helpful installation
+try:
+    import requests
+    from gdown.download import _get_session, get_url_from_gdrive_confirmation
+    from gdown.__main__ import _import_cookies_from_browser
+except ImportError:
+    print("[INIT] Dependencias 'requests' o 'gdown' no encontradas. Instalando automáticamente...", flush=True)
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "requests", "gdown"])
+    import requests
+    from gdown.download import _get_session, get_url_from_gdrive_confirmation
+    from gdown.__main__ import _import_cookies_from_browser
 
-COOKIES_FILE = os.path.expanduser(f"~/.cache/gdown/cookies_{BROWSER}.txt")
-STATUS_FILE = os.path.join(OUT_DIR, "download_status.json")
 
-os.makedirs(OUT_DIR, exist_ok=True)
-os.makedirs(os.path.dirname(COOKIES_FILE), exist_ok=True)
-
-def refresh_session_from_browser(target_url=None):
+def refresh_session_from_browser(browser="chrome", cookies_file=None, target_url=None, no_refresh=False):
     """Refreshes active Google Drive tab in the browser on macOS and extracts cookies."""
-    if NO_REFRESH or sys.platform != "darwin":
+    if no_refresh or sys.platform != "darwin":
         try:
-            n = _import_cookies_from_browser(browser=BROWSER, cookies_file=COOKIES_FILE)
+            n = _import_cookies_from_browser(browser=browser, cookies_file=cookies_file)
             return True
         except Exception as e:
-            print(f"[AUTH] Advertencia importando cookies de {BROWSER}: {e}", flush=True)
+            print(f"[AUTH] Advertencia importando cookies de {browser}: {e}", flush=True)
             return False
 
     browser_app_map = {
@@ -137,7 +40,7 @@ def refresh_session_from_browser(target_url=None):
         "brave": "Brave Browser",
         "edge": "Microsoft Edge",
     }
-    app_name = browser_app_map.get(BROWSER, "Google Chrome")
+    app_name = browser_app_map.get(browser.lower(), "Google Chrome")
 
     if target_url:
         print(f"[AUTH] Asegurando sesión activa en {app_name}...", flush=True)
@@ -166,47 +69,46 @@ def refresh_session_from_browser(target_url=None):
             pass
 
     try:
-        n = _import_cookies_from_browser(browser=BROWSER, cookies_file=COOKIES_FILE)
+        n = _import_cookies_from_browser(browser=browser, cookies_file=cookies_file)
         print(f"[AUTH] Sincronizadas {n} cookies desde {app_name}.", flush=True)
         return True
     except Exception as e:
         print(f"[AUTH] Advertencia importando cookies: {e}", flush=True)
         return False
 
-def get_session():
+
+def get_session(cookies_file):
     sess, _ = _get_session(
         proxy=None,
         use_cookies=True,
         user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
-        cookies_file=COOKIES_FILE,
+        cookies_file=cookies_file,
     )
     return sess
+
 
 def extract_id_from_url(url_or_id):
     url_or_id = url_or_id.strip()
     if "/" not in url_or_id and len(url_or_id) >= 20:
         return url_or_id, "unknown"
-    
-    # Check folder URL
+
     m = re.search(r'/folders/([a-zA-Z0-9_-]{20,})', url_or_id)
     if m:
         return m.group(1), "folder"
-    
-    # Check file /d/ URL
+
     m = re.search(r'/file/d/([a-zA-Z0-9_-]{20,})', url_or_id)
     if m:
         return m.group(1), "file"
-    
-    # Check uc?id= URL
+
     m = re.search(r'[?&]id=([a-zA-Z0-9_-]{20,})', url_or_id)
     if m:
         return m.group(1), "file"
-    
+
     return url_or_id, "unknown"
+
 
 def parse_input_target(arg):
     if os.path.isfile(arg):
-        # Check if .webloc
         if arg.lower().endswith(".webloc"):
             try:
                 with open(arg, "rb") as f:
@@ -224,7 +126,6 @@ def parse_input_target(arg):
                             return [m.group(0)]
                 except Exception:
                     pass
-        # Text file with URLs
         urls = []
         with open(arg, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
@@ -234,24 +135,24 @@ def parse_input_target(arg):
         return urls
     return [arg]
 
-def discover_folder_files(sess, folder_id):
+
+def discover_folder_files(sess, folder_id, browser, cookies_file, no_refresh):
     url = f"https://drive.google.com/drive/folders/{folder_id}"
     print(f"[FOLDER] Explorando carpeta de Drive: {url}...", flush=True)
-    refresh_session_from_browser(target_url=url)
-    sess = get_session()
-    
+    refresh_session_from_browser(browser=browser, cookies_file=cookies_file, target_url=url, no_refresh=no_refresh)
+    sess = get_session(cookies_file)
+
     res = sess.get(url, timeout=(10, 20))
     if res.status_code != 200:
         raise RuntimeError(f"Error accediendo a la carpeta (HTTP {res.status_code})")
-    
+
     html = res.text
-    # Extract files and IDs
     matches = re.findall(r'aria-label=[\"\']([^\"\']+?)(?:\s+(?:Binary|PDF|ZIP|RAR|Audio|Video|Image|Document|Spreadsheet))?[\"\'][^>]*?ssk=[\"\'][^:\'\"]*:[^:\'\"]*:([a-zA-Z0-9_-]{28,35})-\d+-\d+[\"\']', html)
-    
+
     seen = set()
     files = []
     ignored_prefixes = ("Modified ", "Size:", "Storage used:", "More actions")
-    
+
     for name, fid in matches:
         name = name.strip()
         if any(name.startswith(p) for p in ignored_prefixes):
@@ -259,22 +160,22 @@ def discover_folder_files(sess, folder_id):
         if name not in seen:
             seen.add(name)
             files.append({"name": name, "id": fid})
-    
-    # Natural sort
+
     def natural_key(item):
         return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', item["name"])]
-    
+
     files.sort(key=natural_key)
     return files
 
-def resolve_download_url(sess, file_id, folder_url=None):
+
+def resolve_download_url(sess, file_id, browser, cookies_file, folder_url, no_refresh):
     for attempt in range(3):
         try:
             res = sess.get(f"https://drive.google.com/uc?id={file_id}", timeout=(10, 15))
             if "accounts.google.com" in res.url or res.status_code in (401, 403):
                 print("[AUTH] Sesión expirada al resolver enlace. Refrescando...", flush=True)
-                refresh_session_from_browser(folder_url)
-                sess = get_session()
+                refresh_session_from_browser(browser=browser, cookies_file=cookies_file, target_url=folder_url, no_refresh=no_refresh)
+                sess = get_session(cookies_file)
                 continue
             if "Content-Disposition" in res.headers or "application/octet-stream" in res.headers.get("Content-Type", ""):
                 filename = None
@@ -287,28 +188,31 @@ def resolve_download_url(sess, file_id, folder_url=None):
             return url, None, sess
         except Exception as e:
             print(f"[RESOLVE] Intento {attempt+1} falló al resolver enlace: {e}", flush=True)
-            refresh_session_from_browser(folder_url)
-            sess = get_session()
+            refresh_session_from_browser(browser=browser, cookies_file=cookies_file, target_url=folder_url, no_refresh=no_refresh)
+            sess = get_session(cookies_file)
             time.sleep(3)
     raise RuntimeError(f"No se pudo obtener enlace de descarga para {file_id}")
 
-def load_status():
-    if os.path.exists(STATUS_FILE):
+
+def load_status(status_file):
+    if os.path.exists(status_file):
         try:
-            with open(STATUS_FILE, "r") as f:
+            with open(status_file, "r") as f:
                 return json.load(f)
         except Exception:
             pass
     return {"completed": [], "current": None, "total": 0}
 
-def save_status(status):
-    with open(STATUS_FILE, "w") as f:
+
+def save_status(status_file, status):
+    with open(status_file, "w") as f:
         json.dump(status, f, indent=2)
 
-def download_file_resilient(file_info, index, total_files, status, folder_url=None):
+
+def download_file_resilient(file_info, index, total_files, status, out_dir, browser, cookies_file, status_file, folder_url=None, no_refresh=False):
     name = file_info["name"]
     file_id = file_info["id"]
-    target_path = os.path.join(OUT_DIR, name)
+    target_path = os.path.join(out_dir, name)
     tmp_path = f"{target_path}.tmp"
 
     if name in status.get("completed", []) and os.path.exists(target_path):
@@ -321,9 +225,9 @@ def download_file_resilient(file_info, index, total_files, status, folder_url=No
     print(f"=======================================================", flush=True)
 
     status["current"] = name
-    save_status(status)
+    save_status(status_file, status)
 
-    sess = get_session()
+    sess = get_session(cookies_file)
     download_url = None
     total_size = None
     consecutive_errors = 0
@@ -333,10 +237,12 @@ def download_file_resilient(file_info, index, total_files, status, folder_url=No
 
         if not download_url:
             try:
-                download_url, resolved_name, sess = resolve_download_url(sess, file_id, folder_url)
+                download_url, resolved_name, sess = resolve_download_url(
+                    sess, file_id, browser, cookies_file, folder_url, no_refresh
+                )
                 if resolved_name and name == file_id:
                     name = resolved_name
-                    target_path = os.path.join(OUT_DIR, name)
+                    target_path = os.path.join(out_dir, name)
                     tmp_path = f"{target_path}.tmp"
             except Exception as e:
                 print(f"[{name}] Error resolviendo URL: {e}. Reintentando en 5s...", flush=True)
@@ -369,8 +275,8 @@ def download_file_resilient(file_info, index, total_files, status, folder_url=No
 
             if r.status_code in (401, 403) or "accounts.google.com" in r.url:
                 print(f"[{name}] Sesión expirada durante descarga. Renovando...", flush=True)
-                refresh_session_from_browser(folder_url)
-                sess = get_session()
+                refresh_session_from_browser(browser=browser, cookies_file=cookies_file, target_url=folder_url, no_refresh=no_refresh)
+                sess = get_session(cookies_file)
                 download_url = None
                 time.sleep(2)
                 continue
@@ -425,8 +331,8 @@ def download_file_resilient(file_info, index, total_files, status, folder_url=No
             if consecutive_errors >= 2:
                 print(f"[{name}] Renovando enlace de descarga y refrescando sesión desde el navegador...", flush=True)
                 download_url = None
-                refresh_session_from_browser(folder_url)
-                sess = get_session()
+                refresh_session_from_browser(browser=browser, cookies_file=cookies_file, target_url=folder_url, no_refresh=no_refresh)
+                sess = get_session(cookies_file)
                 consecutive_errors = 0
             time.sleep(2)
         except Exception as e:
@@ -444,38 +350,37 @@ def download_file_resilient(file_info, index, total_files, status, folder_url=No
     if name not in status["completed"]:
         status["completed"].append(name)
     status["current"] = None
-    save_status(status)
+    save_status(status_file, status)
     return True
 
-def auto_join_parts(files_list):
+
+def auto_join_parts(files_list, out_dir, join_output):
     part_names = [f["name"] for f in files_list if re.search(r'part[_-]?\d+', f["name"], re.IGNORECASE)]
     if not part_names:
         print("[JOIN] No se detectaron archivos de partes divididas para unir.", flush=True)
         return
-    
-    # Natural sort
+
     def natural_key(name):
         return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', name)]
-    
+
     part_names.sort(key=natural_key)
-    
-    out_name = JOIN_OUTPUT
+
+    out_name = join_output
     if not out_name:
-        # Infer name from common prefix
         first = part_names[0]
         base = re.sub(r'[._-]part[._-]?\d+.*$', '', first, flags=re.IGNORECASE)
         if not base or base == first:
             base = "combined_output"
         out_name = f"{base}.iso"
 
-    final_joined_path = os.path.join(OUT_DIR, out_name)
+    final_joined_path = os.path.join(out_dir, out_name)
     print(f"\n[JOIN] Uniendo {len(part_names)} partes en: {final_joined_path}...", flush=True)
 
-    expected_total = sum(os.path.getsize(os.path.join(OUT_DIR, p)) for p in part_names if os.path.exists(os.path.join(OUT_DIR, p)))
-    
+    expected_total = sum(os.path.getsize(os.path.join(out_dir, p)) for p in part_names if os.path.exists(os.path.join(out_dir, p)))
+
     with open(final_joined_path, "wb") as outfile:
         for p in part_names:
-            src = os.path.join(OUT_DIR, p)
+            src = os.path.join(out_dir, p)
             print(f"  + Concatenando {p}...", flush=True)
             with open(src, "rb") as infile:
                 while True:
@@ -489,7 +394,6 @@ def auto_join_parts(files_list):
     if expected_total == actual_size:
         print("[JOIN] Verificación por suma de bytes: EXACTA (100% OK) ✅", flush=True)
 
-    # Inspect file format if tool available
     try:
         res = subprocess.run(["file", final_joined_path], capture_output=True, text=True)
         if res.returncode == 0:
@@ -497,11 +401,31 @@ def auto_join_parts(files_list):
     except Exception:
         pass
 
+
 def main():
-    raw_args = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description="Ultra-resilient Google Drive downloader: handles folders, split parts, browser cookie sync, range resume & auto-join"
+    )
+    parser.add_argument("inputs", nargs="+", help="Google Drive folder/file URL, .webloc file, raw ID, or text file with URLs")
+    parser.add_argument("-o", "--out-dir", default=os.environ.get("OUT_DIR", "."), help="Output directory (default: current dir or $OUT_DIR)")
+    parser.add_argument("-b", "--browser", default="chrome", help="Browser to extract cookies from: chrome, safari, firefox, brave, edge (default: chrome)")
+    parser.add_argument("-j", "--join", nargs="?", const="", default=None, help="Auto-join split parts into a single file after completion (optional filename)")
+    parser.add_argument("-p", "--pause-after", default="", help="Pause downloads after completing part N (1-based index or part name)")
+    parser.add_argument("--no-refresh", action="store_true", help="Disable AppleScript browser tab reloading (for headless environments)")
+
+    args = parser.parse_args()
+
+    out_dir = os.path.abspath(args.out_dir)
+    os.makedirs(out_dir, exist_ok=True)
+
+    cookies_file = os.path.expanduser(f"~/.cache/gdown/cookies_{args.browser.lower()}.txt")
+    os.makedirs(os.path.dirname(cookies_file), exist_ok=True)
+
+    status_file = os.path.join(out_dir, "download_status.json")
+
     targets = []
-    for arg in raw_args:
-        targets.extend(parse_input_target(arg))
+    for inp in args.inputs:
+        targets.extend(parse_input_target(inp))
 
     if not targets:
         print("Error: No se proporcionaron URLs o archivos válidos.", flush=True)
@@ -514,8 +438,8 @@ def main():
         target_id, kind = extract_id_from_url(target)
         if kind == "folder" or "folders" in target:
             folder_url = f"https://drive.google.com/drive/folders/{target_id}"
-            sess = get_session()
-            folder_files = discover_folder_files(sess, target_id)
+            sess = get_session(cookies_file)
+            folder_files = discover_folder_files(sess, target_id, args.browser, cookies_file, args.no_refresh)
             all_files.extend(folder_files)
         else:
             all_files.append({"id": target_id, "name": target_id})
@@ -524,25 +448,26 @@ def main():
         print("Error: No se encontraron archivos para descargar.", flush=True)
         sys.exit(1)
 
-    status = load_status()
+    status = load_status(status_file)
     status["total"] = len(all_files)
-    save_status(status)
+    save_status(status_file, status)
 
     print(f"\n=== INICIANDO DESCARGA ULTRA-RESILIENTE ({len(all_files)} ARCHIVOS) ===", flush=True)
-    print(f"Destino: {OUT_DIR}")
-    print(f"Navegador de autenticación: {BROWSER}")
-    if PAUSE_AFTER:
-        print(f"Pausa programada tras completar: {PAUSE_AFTER}")
+    print(f"Destino: {out_dir}")
+    print(f"Navegador de autenticación: {args.browser}")
+    if args.pause_after:
+        print(f"Pausa programada tras completar: {args.pause_after}")
 
     for idx, item in enumerate(all_files, start=1):
-        success = download_file_resilient(item, idx, len(all_files), status, folder_url)
+        success = download_file_resilient(
+            item, idx, len(all_files), status, out_dir, args.browser, cookies_file, status_file, folder_url, args.no_refresh
+        )
         if not success:
             print(f"[ERROR FATAL] Falló la descarga de {item['name']}.", flush=True)
             sys.exit(1)
 
-        # Check pause condition
-        if PAUSE_AFTER:
-            if str(idx) == PAUSE_AFTER or item["name"] == PAUSE_AFTER:
+        if args.pause_after:
+            if str(idx) == args.pause_after or item["name"] == args.pause_after:
                 print(f"\n[PAUSA] Condición de pausa alcanzada tras finalizar {item['name']}. Deteniendo descargas.", flush=True)
                 sys.exit(0)
 
@@ -550,9 +475,9 @@ def main():
     print(f"=== TODAS LAS {len(all_files)} PARTES DESCARGADAS Y VERIFICADAS ===", flush=True)
     print("=======================================================", flush=True)
 
-    if DO_JOIN:
-        auto_join_parts(all_files)
+    if args.join is not None:
+        auto_join_parts(all_files, out_dir, args.join)
+
 
 if __name__ == "__main__":
     main()
-EOF

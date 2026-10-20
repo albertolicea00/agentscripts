@@ -5,8 +5,8 @@ ENV_VPS    = $(SYNC_VPS)/.env
 COLAB_CONN = .colab-connect
 ENV_COLAB  = $(COLAB_CONN)/.env
 
-# Auto-discover all .sh files (excluding hidden dirs like .sync-vps, .colab-connect)
-SCRIPTS := $(shell find . -name "*.sh" -not -path "*/\.*" | sed 's|^\./||' | sort)
+# Auto-discover all .sh and .py files (excluding hidden dirs like .sync-vps, .colab-connect)
+SCRIPTS := $(shell find . \( -name "*.sh" -o -name "*.py" \) -not -path "*/\.*" | sed 's|^\./||' | sort)
 
 help:
 	@echo ""
@@ -24,7 +24,7 @@ help:
 		echo "    (none yet)"; \
 	else \
 		for s in $(SCRIPTS); do \
-			name=$$(basename "$$s" .sh); \
+			name=$$(basename "$$s" | sed 's/\.[^.]*$$//'); \
 			dir=$$(dirname "$$s" | sed 's|^\./||'); \
 			desc=$$(grep -m1 '^#[^!]' "$$s" 2>/dev/null | sed 's/^# *//; s/ *$$//'); \
 			[ -z "$$desc" ] && desc="(no description)"; \
@@ -62,9 +62,12 @@ run-colab:
 # ── Dynamic script runner ─────────────────────────────────────────────────────
 
 run-%:
-	@script=$$(find . -name "$*.sh" -not -path "*/\.*" | head -1); \
+	@script=$$(find . \( -name "$*.sh" -o -name "$*.py" \) -not -path "*/\.*" | head -1); \
 	if [ -z "$$script" ]; then \
-		echo "No script named '$*.sh' found under scripts/"; exit 1; \
+		echo "No script named '$*.sh' or '$*.py' found under scripts/"; exit 1; \
 	fi; \
 	echo "Running: $$script"; \
-	bash "$$script"
+	case "$$script" in \
+		*.py) python3 "$$script" $(ARGS) ;; \
+		*.sh) bash "$$script" $(ARGS) ;; \
+	esac
