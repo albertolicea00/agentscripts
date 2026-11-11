@@ -164,6 +164,8 @@ Format (same in all three):
 
 Every AI-assisted commit must include a `Co-authored-by` trailer identifying the actual AI assistant that contributed.
 
+The trailer is mandatory; a single assistant identity is not mandatory for all agents. Each agent must attribute its own work to itself. Identity examples and assistant-specific rules apply only to that named assistant, never to other agents.
+
 - Codex must use exactly: `Co-authored-by: Codex <noreply@openai.com>` (verified in the installed OpenAI Codex CLI).
 - Other assistants must use their own verified attribution identity. Never copy another assistant's identity: Codex must not attribute its work to Gemini, Claude, or another product.
 - **NEVER** use `<antigravity@gmail.com>`, `<antigravity@google.com>`, or invented, ambiguous, or unverified co-author identities or emails: GitHub may associate them with unrelated users.
