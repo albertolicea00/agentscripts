@@ -1,5 +1,5 @@
 .PHONY: help setup pull push pull-colab push-colab \
-        open-romsfun open-hls open-ytdlp open-colab-connect
+        open-romsfun open-hls open-ytdlp open-colab-connect open-archive-torrents
 
 SYNC        = .sync-colab
 ENV_FILE    = $(SYNC)/.env
@@ -40,6 +40,10 @@ push-colab: ## Open push notebook in Colab (OAuth)
 	  || xdg-open "$(COLAB_BASE)/.sync-colab/push.ipynb"
 
 # ── Open notebooks in Colab ──────────────────────────────────────────────────
+
+open-archive-torrents: ## Open Archive.org torrent/HTTPS downloader in Colab
+	@open "$(COLAB_BASE)/downloads/archive-torrents.ipynb" 2>/dev/null \
+	  || xdg-open "$(COLAB_BASE)/downloads/archive-torrents.ipynb"
 
 open-romsfun: ## Open romsfun PSP ROM downloader in Colab
 	@open "$(COLAB_BASE)/downloads/romsfun.ipynb" 2>/dev/null \

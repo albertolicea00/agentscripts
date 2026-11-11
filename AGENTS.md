@@ -2,6 +2,11 @@
 
 Instructions for AI agents working in this repository.
 
+## Language
+
+- Write all new or modified repository content in English, including code identifiers, comments, documentation, notebook text, widget labels, user-facing messages, changelog entries, and commit messages.
+- Preserve external names, URLs, and user-provided data as needed. Conversations with the user may use their preferred language.
+
 ## Repository Purpose
 
 `agentscripts` holds two kinds of automation:
@@ -157,11 +162,13 @@ Format (same in all three):
 
 ## Commit attribution
 
-Co-authoring with AI is allowed and encouraged.
-When adding a `Co-Authored-By` trailer:
-- Use: `Co-Authored-By: gemini-code-assist-user <gemini-code-assist@google.com>` (or omit trailer).
-- **NEVER** use `<antigravity@google.com>` (as GitHub links that email to an unrelated individual account `shimonenator`).
-- If in doubt, do not add a co-author trailer so only `@albertolicea00` appears as author.
+Every AI-assisted commit must include a `Co-authored-by` trailer identifying the actual AI assistant that contributed.
+
+- Codex must use exactly: `Co-authored-by: Codex <noreply@openai.com>` (verified in the installed OpenAI Codex CLI).
+- Other assistants must use their own verified attribution identity. Never copy another assistant's identity: Codex must not attribute its work to Gemini, Claude, or another product.
+- **NEVER** use `<antigravity@gmail.com>`, `<antigravity@google.com>`, or invented, ambiguous, or unverified co-author identities or emails: GitHub may associate them with unrelated users.
+- Never guess an email from an agent or product name. Verify the identity from the assistant's official tooling or documentation.
+- Never omit the required co-author trailer from AI-assisted commits.
 
 ## TODO.md
 

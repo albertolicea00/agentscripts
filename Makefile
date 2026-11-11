@@ -1,5 +1,5 @@
 .PHONY: help setup pull push pull-colab push-colab \
-        open-romsfun open-hls open-ytdlp open-colab-connect \
+        open-romsfun open-hls open-ytdlp open-colab-connect open-archive-torrents \
         setup-colab connect-colab run-colab
 
 help: ## Show all commands
@@ -30,6 +30,9 @@ push-colab:
 
 open-romsfun:
 	@$(MAKE) -C notebooks open-romsfun --no-print-directory
+
+open-archive-torrents:
+	@$(MAKE) -C notebooks open-archive-torrents --no-print-directory
 
 open-hls:
 	@$(MAKE) -C notebooks open-hls --no-print-directory

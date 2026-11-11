@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-11
+
+- Added: `notebooks/downloads/archive-torrents.ipynb` — Archive.org torrent downloader with ISO selection, HTTPS fallback for items without torrents, SHA-1 verification, resumable local downloads, and final Google Drive copy; English documentation, comments, widget labels, and runtime messages; registered in README and notebook Makefile.
+
 ## 2026-10-09
 
 - Changed: `notebooks/downloads/romsfun.ipynb` — download directly to Google Drive instead of `/content/` temp + copy. Mount Drive in setup cell, removed final copy cell. Better for unstable connections (files survive Colab disconnects).

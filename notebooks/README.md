@@ -17,6 +17,7 @@ Run `make help` from repo root or this folder to see all commands.
 
 | Notebook | Open | Description |
 |---|---|---|
+| [downloads/archive-torrents.ipynb](downloads/archive-torrents.ipynb) | `make open-archive-torrents` | Download Archive.org ISO images using torrents with HTTPS fallback, verify SHA-1, and copy to `CollabMedia/downloads/archive-torrents/`. |
 | [downloads/romsfun.ipynb](downloads/romsfun.ipynb) | `make open-romsfun` | Scrape and download PSP ROM ISOs from romsfun.com. Bypasses Cloudflare via `cloudscraper`. Output → `CollabMedia/downloads/romsfun/`. |
 | [downloads/hls-colab.ipynb](downloads/hls-colab.ipynb) | `make open-hls` | Download HLS/obfuscated streams (TikTok CDN, standard m3u8, direct MP4). Accepts M3U8 Detector JSON. Output → `CollabMedia/downloads/hls-colab/`. |
 | [downloads/ytdlp-2drive.ipynb](downloads/ytdlp-2drive.ipynb) | `make open-ytdlp` | yt-dlp + EJS/PO-token solver. Requires `cookies.txt`. Output → `CollabMedia/downloads/ytdlp-2drive/`. |

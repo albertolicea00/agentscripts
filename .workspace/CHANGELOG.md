@@ -7,6 +7,12 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-11
+
+- Changed: `AGENTS.md` — require English for repository content and commit messages, and require AI-assisted commits to identify the actual contributing assistant with its verified co-author trailer (Codex: `Codex <noreply@openai.com>`); forbid attribution to another assistant or invented or unverified identities.
+
+- Added: root `Makefile` forwarding target `open-archive-torrents`.
+
 ## 2026-10-09
 
 - Changed: `AGENTS.md` commit attribution guidelines updated to use `gemini-code-assist-user` and forbid `<antigravity@google.com>`.
