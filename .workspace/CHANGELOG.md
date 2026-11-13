@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-13
+
+- Changed: `README.md` — documented official Colab CLI `ssh` subcommand usage, `ProxyCommand` integration, and `~/.ssh/config` setup.
+
 ## 2026-11-11
 
 - Changed: `AGENTS.md` — clarify that co-author attribution is mandatory, while each identity applies only to the assistant that actually contributed.

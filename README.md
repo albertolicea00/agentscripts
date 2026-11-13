@@ -47,11 +47,39 @@ make run-hls-local       # HLS stream → local MP4 (requires ffmpeg)
 make run-dl-tubi         # Tubi progressive MP4 downloader
 ```
 
-**Colab SSH & Remote Execution:**
+**Colab SSH & Remote Execution (Cloudflare Tunnel bridge):**
 ```bash
 make setup-colab         # first-time: check cloudflared & copy SSH public key
 make connect-colab       # interactive SSH connection to Colab runtime
 ```
+
+## Connect via SSH (Colab CLI)
+
+Use the Colab CLI's built-in `ssh` subcommand to connect to your runtime:
+
+- **Direct interactive shell:**
+  ```bash
+  colab ssh
+  ```
+
+- **Connect to a named session:**
+  ```bash
+  colab ssh -s my-session
+  ```
+
+- **OpenSSH `ProxyCommand` integration (e.g., IDE remote development):**
+  ```bash
+  ssh -o ProxyCommand="colab ssh --proxy-mode -s my-session" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@colab-runtime
+  ```
+
+- **`~/.ssh/config`:**
+  ```sshconfig
+  Host colab
+    User root
+    ProxyCommand colab ssh --proxy-mode -s colab
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+  ```
 
 **Sync:**
 ```bash
