@@ -148,6 +148,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from urllib.parse import quote, unquote, urlparse
 import requests
@@ -219,6 +220,7 @@ def verified(path: Path, info: dict) -> bool:
 total_gb = sum(int(f["size"]) for f in selected) / 1024**3
 print(f"Item: {item} | Files: {len(selected)} | Total: {total_gb:.2f} GiB", flush=True)
 
+failures = []
 for idx, f in enumerate(selected, 1):
     name = f["name"]
     tgt = safe_path(work, name)
@@ -241,49 +243,68 @@ for idx, f in enumerate(selected, 1):
     dl_target = drive_tgt.with_name(drive_tgt.name + ".copying") if direct_to_drive else tgt
     dl_target.parent.mkdir(parents=True, exist_ok=True)
 
-    if direct_to_drive or not verified(tgt, f):
-        print(f"[{idx}/{len(selected)}] Downloading {name} ({sz:.2f} GiB){' [direct-to-Drive]' if direct_to_drive else ''}...", flush=True)
-        cmd = [
-            "aria2c", "--no-conf=true", "--continue=true", "--auto-file-renaming=false",
-            "--allow-overwrite=true", "--check-integrity=true", "--file-allocation=none",
-            "--summary-interval=15", "--console-log-level=warn", "--max-tries=5",
-            "--retry-wait=10", "--connect-timeout=30", "--timeout=60",
-            f"--dir={dl_target.parent}", f"--out={dl_target.name}", "--split=8",
-            "--max-connection-per-server=8", f"--checksum=sha-1={sha1}",
-        ]
-        if cookie:
-            cmd.append(f"--header=Cookie: {cookie}")
-        cmd.append(url)
-        subprocess.run(cmd, check=True)
-        if not verified(dl_target, f):
-            raise RuntimeError(f"SHA-1 verification failed: {name}")
-
-    if direct_to_drive:
-        os.replace(dl_target, drive_tgt)
-        print(f"[{idx}/{len(selected)}] Saved and verified on Drive: {drive_tgt}", flush=True)
-    else:
-        drive_tgt.parent.mkdir(parents=True, exist_ok=True)
-        partial = drive_tgt.with_name(drive_tgt.name + ".copying")
-        print(f"[{idx}/{len(selected)}] Copying to Drive: {drive_tgt}...", flush=True)
-        copied = 0
-        next_report = 512 * 1024 * 1024
-        with tgt.open("rb") as src_f, partial.open("wb") as dst_f:
-            while True:
-                buf = src_f.read(16 * 1024 * 1024)
-                if not buf:
+    try:
+        if direct_to_drive or not verified(tgt, f):
+            print(f"[{idx}/{len(selected)}] Downloading {name} ({sz:.2f} GiB){' [direct-to-Drive]' if direct_to_drive else ''}...", flush=True)
+            cmd = [
+                "aria2c", "--no-conf=true", "--continue=true", "--auto-file-renaming=false",
+                "--allow-overwrite=true", "--check-integrity=true", "--file-allocation=none",
+                "--summary-interval=15", "--console-log-level=warn", "--max-tries=5",
+                "--retry-wait=10", "--connect-timeout=30", "--timeout=60",
+                f"--dir={dl_target.parent}", f"--out={dl_target.name}", "--split=8",
+                "--max-connection-per-server=8", f"--checksum=sha-1={sha1}",
+            ]
+            if cookie:
+                cmd.append(f"--header=Cookie: {cookie}")
+            cmd.append(url)
+            for attempt in range(1, 4):
+                try:
+                    subprocess.run(cmd, check=True)
                     break
-                dst_f.write(buf)
-                copied += len(buf)
-                if copied >= next_report or copied == sz_bytes:
-                    pct = copied * 100 // sz_bytes if sz_bytes else 100
-                    print(f"  Copy progress: {copied / 1024**3:.2f}/{sz:.2f} GiB ({pct}%)", flush=True)
-                    next_report += 512 * 1024 * 1024
-        if not verified(partial, f):
-            raise RuntimeError(f"Drive SHA-1 verification failed: {name}")
-        os.replace(partial, drive_tgt)
-        if keep_local != "1":
-            tgt.unlink()
-        print(f"[{idx}/{len(selected)}] Saved on Drive and cleaned local temp: {name}", flush=True)
+                except subprocess.CalledProcessError as exc:
+                    if attempt == 3:
+                        raise
+                    wait_s = 15 * attempt
+                    print(f"[{idx}/{len(selected)}] aria2c exited {exc.returncode}; retrying in {wait_s}s (attempt {attempt}/3)...", flush=True)
+                    time.sleep(wait_s)
+            if not verified(dl_target, f):
+                raise RuntimeError(f"SHA-1 verification failed: {name}")
+
+        if direct_to_drive:
+            os.replace(dl_target, drive_tgt)
+            print(f"[{idx}/{len(selected)}] Saved and verified on Drive: {drive_tgt}", flush=True)
+        else:
+            drive_tgt.parent.mkdir(parents=True, exist_ok=True)
+            partial = drive_tgt.with_name(drive_tgt.name + ".copying")
+            print(f"[{idx}/{len(selected)}] Copying to Drive: {drive_tgt}...", flush=True)
+            copied = 0
+            next_report = 512 * 1024 * 1024
+            with tgt.open("rb") as src_f, partial.open("wb") as dst_f:
+                while True:
+                    buf = src_f.read(16 * 1024 * 1024)
+                    if not buf:
+                        break
+                    dst_f.write(buf)
+                    copied += len(buf)
+                    if copied >= next_report or copied == sz_bytes:
+                        pct = copied * 100 // sz_bytes if sz_bytes else 100
+                        print(f"  Copy progress: {copied / 1024**3:.2f}/{sz:.2f} GiB ({pct}%)", flush=True)
+                        next_report += 512 * 1024 * 1024
+            if not verified(partial, f):
+                raise RuntimeError(f"Drive SHA-1 verification failed: {name}")
+            os.replace(partial, drive_tgt)
+            if keep_local != "1":
+                tgt.unlink()
+            print(f"[{idx}/{len(selected)}] Saved on Drive and cleaned local temp: {name}", flush=True)
+    except Exception as err:
+        failures.append((name, str(err)))
+        print(f"[{idx}/{len(selected)}] ERROR for {name}: {err} (continuing batch)", flush=True)
+
+if failures:
+    print(f"BATCH_FINISHED_WITH_FAILURES ({len(failures)}):", flush=True)
+    for fname, err in failures:
+        print(f"  - {fname}: {err}", flush=True)
+    sys.exit(1)
 
 print("ALL_BATCH_DONE_ON_DRIVE", flush=True)
 PY_EOF

@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-14
 
+- Fixed: `scripts/downloads/colab-archive-dl.sh` — added 3x aria2c retry with backoff for transient Archive.org HTTP 500 errors and per-file failure isolation so one bad file does not abort the batch.
 - Fixed: `scripts/downloads/colab-archive-dl.sh` — added SSH `ServerAliveInterval=30` keepalives and chunked Drive copy progress output to prevent WebSocket/SSH timeouts during multi-GiB Drive copies.
 - Fixed: `scripts/downloads/colab-archive-dl.sh` — use `RawConfigParser` when reading `~/.config/internetarchive/ia.ini` so URL-encoded `%` characters in Archive.org cookies do not trigger interpolation errors.
 - Changed: `scripts/downloads/colab-archive-dl.sh` — added multi-format support (`.iso`, `.zip`, `.pkg`, `.7z`, `.chd`, `.rar`), `--filter`/`--exclude`/`--max-gb`/`--list` flags, Archive.org login cookie support (`--cookie`, `ARCHIVE_COOKIE`, or `~/.config/internetarchive/ia.ini`), automatic local `/content/` cleanup after Drive SHA-1 verification, and direct-to-Drive fallback for files larger than Colab local storage.
