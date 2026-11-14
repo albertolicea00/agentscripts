@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-14
 
+- Changed: `AGENTS.md` — added general rule to schedule 5-minute progress check-ins (progress, speed, ETA) for long-running background tasks.
 - Changed: `README.md` — add `albertolicea00/agentsconfig` to Related repos.
 - Changed: `README.md` — expanded Colab CLI SSH documentation with installation, Ed25519 key requirement, `drivemount` workflow, single-SSH-session limit, and Archive.org HTTPS vs torrent notes.
 

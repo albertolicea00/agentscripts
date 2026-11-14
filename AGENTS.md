@@ -172,6 +172,12 @@ The trailer is mandatory; a single assistant identity is not mandatory for all a
 - Never guess an email from an agent or product name. Verify the identity from the assistant's official tooling or documentation.
 - Never omit the required co-author trailer from AI-assisted commits.
 
+## Long-running tasks & progress updates
+
+For background tasks that take several minutes or longer (e.g., large downloads, Drive copies, batch processing):
+- Schedule a periodic check-in every **5 minutes** (300 seconds) while the task is running.
+- Report current progress (file/item count, percentage, download speed, and ETA) and confirm the job has not stalled or disconnected.
+
 ## TODO.md
 
 Informal backlog. No structure required. Drop ideas, clean up when done.
