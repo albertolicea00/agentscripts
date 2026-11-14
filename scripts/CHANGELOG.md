@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-14
 
+- Fixed: `scripts/downloads/colab-archive-dl.sh` — use `RawConfigParser` when reading `~/.config/internetarchive/ia.ini` so URL-encoded `%` characters in Archive.org cookies do not trigger interpolation errors.
 - Changed: `scripts/downloads/colab-archive-dl.sh` — added multi-format support (`.iso`, `.zip`, `.pkg`, `.7z`, `.chd`, `.rar`), `--filter`/`--exclude`/`--max-gb`/`--list` flags, Archive.org login cookie support (`--cookie`, `ARCHIVE_COOKIE`, or `~/.config/internetarchive/ia.ini`), automatic local `/content/` cleanup after Drive SHA-1 verification, and direct-to-Drive fallback for files larger than Colab local storage.
 - Added: `scripts/downloads/colab-archive-dl.sh` — download Archive.org `.iso` files to Google Drive via Colab CLI SSH (`aria2c` HTTPS `--split=8` + SHA-1 verification).
 

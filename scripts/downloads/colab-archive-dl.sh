@@ -57,7 +57,7 @@ import configparser
 from pathlib import Path
 for p in [Path.home() / ".config/internetarchive/ia.ini", Path.home() / ".ia"]:
     if p.is_file():
-        cp = configparser.ConfigParser()
+        cp = configparser.RawConfigParser()
         cp.read(p)
         if cp.has_section("cookies"):
             u = cp.get("cookies", "logged-in-user", fallback="").strip()
