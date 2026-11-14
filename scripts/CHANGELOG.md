@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-14
+
+- Added: `scripts/downloads/colab-archive-dl.sh` — download Archive.org `.iso` files to Google Drive via Colab CLI SSH (`aria2c` HTTPS `--split=8` + SHA-1 verification).
+
 ## 2026-10-09
 
 - Added: `scripts/downloads/dl-romsfun-batch.sh` — download retro/PSP ROMs from romsfun.com in batch with Cloudflare bypass, dynamic CDN token resolution & resume.

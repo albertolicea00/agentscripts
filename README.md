@@ -55,16 +55,24 @@ make connect-colab       # interactive SSH connection to Colab runtime
 
 ## Connect via SSH (Colab CLI)
 
-Use the Colab CLI's built-in `ssh` subcommand to connect to your runtime:
+Use the official `google-colab-cli` (`colab ssh`) for direct WebSocket-based SSH access without needing Cloudflare Tunnel:
 
-- **Direct interactive shell:**
+- **Install & authenticate:**
   ```bash
-  colab ssh
+  uv tool install google-colab-cli   # or: pip install google-colab-cli
+  colab usage                        # completes browser OAuth login
   ```
 
-- **Connect to a named session:**
+- **SSH key requirement (important):**
+  Colab SSH **rejects RSA keys (`ssh-rsa`)**. Generate an Ed25519 key (used by default):
   ```bash
-  colab ssh -s my-session
+  ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+  ```
+
+- **Direct interactive shell / named session:**
+  ```bash
+  colab new -s colab                 # creates runtime with both Jupyter kernel + SSH
+  colab ssh -s colab
   ```
 
 - **OpenSSH `ProxyCommand` integration (e.g., IDE remote development):**
@@ -72,14 +80,21 @@ Use the Colab CLI's built-in `ssh` subcommand to connect to your runtime:
   ssh -o ProxyCommand="colab ssh --proxy-mode -s my-session" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@colab-runtime
   ```
 
-- **`~/.ssh/config`:**
+- **`~/.ssh/config` (use the full `colab` path for IDEs/non-login shells):**
   ```sshconfig
   Host colab
     User root
-    ProxyCommand colab ssh --proxy-mode -s colab
+    IdentityFile ~/.ssh/id_ed25519
+    ProxyCommand ~/.local/bin/colab ssh --proxy-mode -s colab
     StrictHostKeyChecking no
     UserKnownHostsFile /dev/null
   ```
+
+- **Operational notes:**
+  - **One SSH session at a time:** Colab returns `HTTP 429` if a second `colab ssh` connects while another is active.
+  - **Mount Drive before long tasks:** `colab drivemount -s colab /content/drive` uses the Jupyter kernel API and prompts for browser OAuth; run it before starting downloads so files can be copied immediately.
+  - **Idle/reclaimed runtimes:** If `ssh colab` or `colab drivemount` returns `HTTP 404`, the runtime was reclaimed or created without a kernel — run `colab new -s colab` to provision a fresh one.
+  - **Archive.org over HTTPS vs Torrent:** Direct HTTPS with `aria2c --split=8` reaches ~30–130+ MiB/s on Colab, whereas Archive.org torrents can stall at ~99% on `.____padding_file/*` entries (`Invalid range header`). Use `make run-colab-archive-dl` or select **HTTPS only** in `archive-torrents.ipynb`.
 
 **Sync:**
 ```bash

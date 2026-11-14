@@ -7,6 +7,7 @@ scripts/
 ├── .colab-connect/         # Google Colab SSH bridge & remote execution (Cloudflare Tunnel)
 ├── .sync-vps/              # VPS ↔ local sync (rsync over SSH)
 └── downloads/
+    ├── colab-archive-dl.sh    # Download Archive.org ISOs to Google Drive via Colab CLI SSH (HTTPS --split=8 + SHA-1)
     ├── dl-gdrive-resilient.py # Resilient Google Drive downloader (folder/split parts, cookie sync, range resume & auto-join)
     ├── dl-romsfun-batch.sh # Download retro/PSP ROMs from romsfun.com in batch from file or URL list
     ├── dl-tubi.sh          # Download Tubi progressive MP4 from M3U8 Detector JSON
@@ -17,6 +18,7 @@ scripts/
 
 ```bash
 make help                 # list all commands (sync + scripts)
+make run-colab-archive-dl # run scripts/downloads/colab-archive-dl.sh
 make run-dl-gdrive-resilient # run scripts/downloads/dl-gdrive-resilient.py
 make run-dl-romsfun-batch # run scripts/downloads/dl-romsfun-batch.sh
 make run-dl-tubi          # run scripts/downloads/dl-tubi.sh
@@ -39,6 +41,7 @@ make run-dl-tubi
 
 | Script | Command | Description |
 |---|---|---|
+| [downloads/colab-archive-dl.sh](downloads/colab-archive-dl.sh) | `make run-colab-archive-dl` | Downloads Archive.org `.iso` files to Google Drive via Colab CLI SSH (`aria2c` HTTPS `--split=8` + SHA-1 verification). |
 | [downloads/dl-gdrive-resilient.py](downloads/dl-gdrive-resilient.py) | `make run-dl-gdrive-resilient` | Resilient Google Drive downloader: handles folders, split parts, Chrome/browser cookie sync, Range resuming, and auto-joining. |
 | [downloads/dl-romsfun-batch.sh](downloads/dl-romsfun-batch.sh) | `make run-dl-romsfun-batch` | Downloads retro/PSP ROMs from romsfun.com in batch from file or URL list. Handles Cloudflare, dynamic CDN tokens, resume, and extraction. |
 | [downloads/dl-tubi.sh](downloads/dl-tubi.sh) | `make run-dl-tubi` | Downloads Tubi progressive MP4 from an M3U8 Detector JSON export. Dedupes repeated segment URLs (single file, not real HLS chunks). |

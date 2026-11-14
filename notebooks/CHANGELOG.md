@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-14
+
+- Changed: `notebooks/downloads/archive-torrents.ipynb` — increased HTTPS `aria2c` `--split` and `--max-connection-per-server` from `4` to `8`, and documented `.____padding_file/*` 99% torrent stall / HTTPS-only workaround.
+
 ## 2026-11-11
 
 - Added: `notebooks/downloads/archive-torrents.ipynb` — Archive.org torrent downloader with ISO selection, HTTPS fallback for items without torrents, SHA-1 verification, resumable local downloads, and final Google Drive copy; English documentation, comments, widget labels, and runtime messages; registered in README and notebook Makefile.

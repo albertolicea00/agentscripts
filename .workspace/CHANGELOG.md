@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-14
+
+- Changed: `README.md` — expanded Colab CLI SSH documentation with installation, Ed25519 key requirement, `drivemount` workflow, single-SSH-session limit, and Archive.org HTTPS vs torrent notes.
+
 ## 2026-11-13
 
 - Changed: `README.md` — documented official Colab CLI `ssh` subcommand usage, `ProxyCommand` integration, and `~/.ssh/config` setup.
