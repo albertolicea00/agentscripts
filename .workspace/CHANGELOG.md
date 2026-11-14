@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-14
 
+- Changed: `README.md` — add `albertolicea00/agentsconfig` to Related repos.
 - Changed: `README.md` — expanded Colab CLI SSH documentation with installation, Ed25519 key requirement, `drivemount` workflow, single-SSH-session limit, and Archive.org HTTPS vs torrent notes.
 
 ## 2026-11-13

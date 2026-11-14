@@ -109,6 +109,7 @@ make push-vps            # local scripts/ → VPS
 
 ## Related repos
 
+- [**albertolicea00/agentsconfig**](https://github.com/albertolicea00/agentsconfig) — global Git security hooks, AI agent configurations, and skill lockfiles.
 - [**albertolicea00/agentskills**](https://github.com/albertolicea00/agentskills) — my collection of agent skills.
 - [**albertolicea00/clawflows**](https://github.com/albertolicea00/clawflows) — the workflow half of this setup: ready-to-use OpenClaw workflows for multi-step tasks you can fire from a chat app. *code, vibe, repeat...*
 
