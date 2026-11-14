@@ -132,7 +132,7 @@ if ! ssh "$SSH_HOST" "test -d /content/drive/MyDrive" 2>/dev/null; then
 fi
 
 echo "Starting HTTPS (--split=8) batch download + SHA-1 verification on '$SESSION'..."
-ssh "$SSH_HOST" \
+ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=10 "$SSH_HOST" \
   "TARGET_ARG=$(printf '%q' "$TARGET") EXTS_ARG=$(printf '%q' "$EXTS") FILTER_ARG=$(printf '%q' "$FILTER") EXCLUDE_ARG=$(printf '%q' "$EXCLUDE") MAX_GB_ARG=$(printf '%q' "$MAX_GB") COOKIE_ARG=$(printf '%q' "$COOKIE") KEEP_LOCAL_ARG=$(printf '%q' "$KEEP_LOCAL") bash -s" <<'REMOTE_EOF'
 set -euo pipefail
 pip -q install requests
@@ -265,7 +265,19 @@ for idx, f in enumerate(selected, 1):
         drive_tgt.parent.mkdir(parents=True, exist_ok=True)
         partial = drive_tgt.with_name(drive_tgt.name + ".copying")
         print(f"[{idx}/{len(selected)}] Copying to Drive: {drive_tgt}...", flush=True)
-        shutil.copyfile(tgt, partial)
+        copied = 0
+        next_report = 512 * 1024 * 1024
+        with tgt.open("rb") as src_f, partial.open("wb") as dst_f:
+            while True:
+                buf = src_f.read(16 * 1024 * 1024)
+                if not buf:
+                    break
+                dst_f.write(buf)
+                copied += len(buf)
+                if copied >= next_report or copied == sz_bytes:
+                    pct = copied * 100 // sz_bytes if sz_bytes else 100
+                    print(f"  Copy progress: {copied / 1024**3:.2f}/{sz:.2f} GiB ({pct}%)", flush=True)
+                    next_report += 512 * 1024 * 1024
         if not verified(partial, f):
             raise RuntimeError(f"Drive SHA-1 verification failed: {name}")
         os.replace(partial, drive_tgt)
