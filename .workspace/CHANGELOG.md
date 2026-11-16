@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-15
 
+- Changed: `docs/colab-limits.md` — documented Colab SSH bridge `exit 255` drops, single-collection retry pattern (avoiding skipping unfinished items), and Archive.org per-item throttling vs Colab network speed.
 - Added: `docs/colab-limits.md` — documented observed Google Colab account plan (`0.00 compute units`, Free tier), VM lifetime/idle timeout behavior, dynamic reset policies, and `colab-archive-dl.sh` operational notes.
 
 ## 2026-11-14

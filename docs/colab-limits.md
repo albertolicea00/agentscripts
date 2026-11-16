@@ -34,3 +34,13 @@ Per Google Colab's official FAQ (`research.google.com/colaboratory/faq.html`):
 - **Resumable across VM resets:** Verified files are written to `/content/drive/MyDrive/CollabMedia/...`. If a VM hits the 12-hour cap or disconnects, re-running `colab-archive-dl.sh` after creating a new session (`colab new -s colab && colab drivemount -s colab`) skips already-verified files on Drive.
 - **Ephemeral `/content/` safety:** Local files in `/content/` are deleted immediately after Drive copy and SHA-1 verification so the `108 GiB` overlay does not fill up.
 - **Single SSH tunnel:** Colab allows only one active `colab ssh` connection per runtime at a time (`HTTP 429` if a second connection opens before the first closes).
+- **Transient SSH bridge drops (`exit 255`):** Even with `ServerAliveInterval=30`, Colab's WebSocket SSH bridge or brief local DNS/network hiccups can trigger `Timeout, server colab not responding` (`exit 255`) while the Colab VM itself remains `IDLE`. Always check `colab status` before creating a new VM.
+- **Retry current collection instead of skipping ahead:** When downloading multiple Archive.org items, **do not** loop across items with `|| continue` (which skips an unfinished collection on `exit 255` and can stall on `HTTP 429` if the previous tunnel is still closing). Run one collection at a time with a retry loop and a short cooldown (e.g., `sleep 10`) until it exits `0` before moving to the next collection:
+  ```bash
+  for attempt in 1 2 3 4 5; do
+    ./scripts/downloads/colab-archive-dl.sh -e nsp,xci <item> && break
+    sleep 10
+  done
+  ```
+- **Archive.org per-item throttling:** While Colab can download at `25–54 MiB/s` from fast Archive.org datanodes, Archive.org throttles certain items/nodes to `~6–8 MiB/s` even with `aria2c --split=8`.
+
