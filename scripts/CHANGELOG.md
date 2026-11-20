@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-20
 
+- Fixed: `scripts/utils/colab-rclone.sh` — restored executable file mode (`100755`) in Git for macOS/Linux direct execution.
 - Added: `scripts/utils/colab-rclone.sh` — optional, disabled-by-default helper to configure (`--enable`) or remove (`--disable`) `rclone` Google Drive access on an active Colab SSH VM with explicit user permission (`ENABLE_COLAB_RCLONE=1` / `--enable` + interactive `YES` confirmation).
 - Changed: `scripts/README.md` — documented `scripts/utils/colab-rclone.sh` (`make run-colab-rclone`).
 
