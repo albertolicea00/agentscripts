@@ -96,6 +96,28 @@ Use the official `google-colab-cli` (`colab ssh`) for direct WebSocket-based SSH
   - **Idle/reclaimed runtimes:** If `ssh colab` or `colab drivemount` returns `HTTP 404`, the runtime was reclaimed or created without a kernel — run `colab new -s colab` to provision a fresh one.
   - **Archive.org over HTTPS vs Torrent:** Direct HTTPS with `aria2c --split=8` reaches ~30–130+ MiB/s on Colab, whereas Archive.org torrents can stall at ~99% on `.____padding_file/*` entries (`Invalid range header`). Use `make run-colab-archive-dl` or select **HTTPS only** in `archive-torrents.ipynb`.
 
+### Optional: Persistent Google Drive via `rclone` (Disabled by Default)
+
+Because Colab runtimes are ephemeral, `colab new` does not automatically mount Google Drive and `colab drivemount` requires browser OAuth on each new VM. As an **optional** alternative, [`rclone`](https://rclone.org/) ("rsync for cloud storage") lets you authenticate once locally and reuse that remote config on Colab for faster parallel transfers (`rclone copy`) or FUSE mounts (`rclone mount`).
+
+> **Security & Exclusive User Permission:** Your local `rclone.conf` contains an OAuth `refresh_token` with access to your Google Drive. This integration is **disabled by default** and is never pushed to Colab automatically. Enabling it requires **explicit user permission** (`--enable` or `ENABLE_COLAB_RCLONE=1`) **plus** an interactive `YES` confirmation every time, and it can be disabled/removed at any time.
+
+- **One-time local setup:**
+  ```bash
+  rclone config   # create a Google Drive remote (default name expected: gdrive)
+  ```
+- **Enable for the active Colab SSH session (opt-in):**
+  ```bash
+  make run-colab-rclone ARGS="--enable"            # copies rclone.conf after YES confirmation
+  make run-colab-rclone ARGS="--enable --mount"    # also mounts gdrive: at /content/drive
+  ```
+- **Check status or disable / remove from Colab:**
+  ```bash
+  make run-colab-rclone ARGS="--status"
+  make run-colab-rclone ARGS="--disable"           # unmounts /content/drive and deletes remote rclone.conf
+  ```
+  You can also permanently revoke access at any time from your Google Account → Security → Third-party access (or by deleting the remote in `rclone config`).
+
 **Sync:**
 ```bash
 make setup               # first-time: create notebooks/.sync-colab/.env

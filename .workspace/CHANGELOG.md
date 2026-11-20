@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-20
+
+- Changed: `README.md` — documented optional, disabled-by-default `rclone` integration for persistent Google Drive access on Colab SSH (requires explicit user permission and can be disabled anytime).
+
 ## 2026-11-15
 
 - Changed: `docs/colab-limits.md` — documented Colab SSH bridge `exit 255` drops, single-collection retry pattern (avoiding skipping unfinished items), and Archive.org per-item throttling vs Colab network speed.

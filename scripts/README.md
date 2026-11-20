@@ -6,6 +6,8 @@ Local shell scripts organized by category, with VPS sync tooling in `.sync-vps/`
 scripts/
 ├── .colab-connect/         # Google Colab SSH bridge & remote execution (Cloudflare Tunnel)
 ├── .sync-vps/              # VPS ↔ local sync (rsync over SSH)
+├── utils/
+│   └── colab-rclone.sh     # Opt-in rclone Google Drive setup/teardown for Colab SSH (disabled by default)
 └── downloads/
     ├── colab-archive-dl.sh    # Batch Archive.org downloader to Google Drive via Colab CLI SSH (--filter, --max-gb, --cookie, auto-cleanup)
     ├── dl-gdrive-resilient.py # Resilient Google Drive downloader (folder/split parts, cookie sync, range resume & auto-join)
@@ -23,6 +25,7 @@ make run-dl-gdrive-resilient # run scripts/downloads/dl-gdrive-resilient.py
 make run-dl-romsfun-batch # run scripts/downloads/dl-romsfun-batch.sh
 make run-dl-tubi          # run scripts/downloads/dl-tubi.sh
 make run-hls-local        # run scripts/downloads/hls-local.sh
+make run-colab-rclone     # run scripts/utils/colab-rclone.sh (opt-in rclone for Colab)
 
 make setup-vps            # first-time: create .sync-vps/.env from template
 make pull-vps             # VPS → local scripts/
@@ -46,6 +49,12 @@ make run-dl-tubi
 | [downloads/dl-romsfun-batch.sh](downloads/dl-romsfun-batch.sh) | `make run-dl-romsfun-batch` | Downloads retro/PSP ROMs from romsfun.com in batch from file or URL list. Handles Cloudflare, dynamic CDN tokens, resume, and extraction. |
 | [downloads/dl-tubi.sh](downloads/dl-tubi.sh) | `make run-dl-tubi` | Downloads Tubi progressive MP4 from an M3U8 Detector JSON export. Dedupes repeated segment URLs (single file, not real HLS chunks). |
 | [downloads/hls-local.sh](downloads/hls-local.sh) | `make run-hls-local` | Downloads HLS or direct video streams from M3U8 Detector JSON. Requires `curl` and `ffmpeg`. |
+
+## utils
+
+| Script | Command | Description |
+|---|---|---|
+| [utils/colab-rclone.sh](utils/colab-rclone.sh) | `make run-colab-rclone` | Optional, disabled-by-default helper to configure (`--enable`) or remove (`--disable`) `rclone` Google Drive access on an active Colab SSH VM. Requires explicit user permission (`--enable` / `ENABLE_COLAB_RCLONE=1` + interactive `YES` confirmation) before copying `rclone.conf`. |
 
 ---
 

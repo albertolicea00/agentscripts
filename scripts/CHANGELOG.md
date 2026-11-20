@@ -7,6 +7,11 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-20
+
+- Added: `scripts/utils/colab-rclone.sh` — optional, disabled-by-default helper to configure (`--enable`) or remove (`--disable`) `rclone` Google Drive access on an active Colab SSH VM with explicit user permission (`ENABLE_COLAB_RCLONE=1` / `--enable` + interactive `YES` confirmation).
+- Changed: `scripts/README.md` — documented `scripts/utils/colab-rclone.sh` (`make run-colab-rclone`).
+
 ## 2026-11-14
 
 - Fixed: `scripts/downloads/colab-archive-dl.sh` — added 3x aria2c retry with backoff for transient Archive.org HTTP 500 errors and per-file failure isolation so one bad file does not abort the batch.
