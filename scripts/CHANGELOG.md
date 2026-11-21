@@ -7,6 +7,11 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-21
+
+- Added: `scripts/utils/colab-godot-build.sh` — clone any Godot Git repository on Google Colab via CLI SSH, export debug/release Android (`.apk`), Windows (`.exe`), or Linux builds, verify SHA-256 checksums, copy outputs to Google Drive, flush FUSE (`drive.flush_and_unmount()`), and stop the session.
+- Changed: `scripts/README.md` — documented `scripts/utils/colab-godot-build.sh` (`make run-colab-godot-build`).
+
 ## 2026-11-20
 
 - Added: `scripts/utils/colab-rclone.sh` — optional, disabled-by-default helper to configure (`--enable`) or remove (`--disable`) `rclone` Google Drive access on an active Colab SSH VM with explicit user permission (`ENABLE_COLAB_RCLONE=1` / `--enable` + interactive `YES` confirmation).
