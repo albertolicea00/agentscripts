@@ -122,16 +122,19 @@ log "Release ID: ${RELEASE_ID}"
 
 get_remote_asset_info() {
   local name="$1"
-  gh api "repos/${REPO}/releases/${RELEASE_ID}/assets?per_page=100" | python3 - "$name" <<'PY'
+  gh api "repos/${REPO}/releases/${RELEASE_ID}/assets?per_page=100" | python3 -c '
 import json, sys
 target = sys.argv[1]
 assets = json.load(sys.stdin)
 for a in assets:
     if a.get("name") == target:
-        print(f"{a['id']}|{a.get('state','')}|{a.get('size',0)}")
+        aid = a["id"]
+        st = a.get("state", "")
+        sz = a.get("size", 0)
+        print(f"{aid}|{st}|{sz}")
         sys.exit(0)
 print("")
-PY
+' "$name"
 }
 
 delete_remote_asset() {

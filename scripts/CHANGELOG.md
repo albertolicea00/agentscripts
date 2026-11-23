@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-23
 
+- Fixed: `scripts/utils/gh-release-upload-resilient.sh` — read piped `gh api` JSON via `python3 -c` instead of `python3 - <<'PY'` so stdin is not consumed by the heredoc.
 - Added: `scripts/utils/gh-release-upload-resilient.sh` — sequential GitHub Release asset uploader hardened for slow/unstable connections (`curl --http1.1`, keepalive, stall detection, partial `starter` asset cleanup, retries with backoff, status file output, and post-upload size verification).
 - Changed: `scripts/README.md` — documented `scripts/utils/gh-release-upload-resilient.sh` (`make run-gh-release-upload-resilient`).
 
