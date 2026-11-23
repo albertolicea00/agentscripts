@@ -7,8 +7,9 @@ scripts/
 ├── .colab-connect/         # Google Colab SSH bridge & remote execution (Cloudflare Tunnel)
 ├── .sync-vps/              # VPS ↔ local sync (rsync over SSH)
 ├── utils/
-│   ├── colab-godot-build.sh # Clone a Godot Git repo on Colab, export debug/release APK/EXE, and copy to Google Drive
-│   └── colab-rclone.sh     # Opt-in rclone Google Drive setup/teardown for Colab SSH (disabled by default)
+│   ├── colab-godot-build.sh        # Clone a Godot Git repo on Colab, export debug/release APK/EXE, and copy to Google Drive
+│   ├── colab-rclone.sh             # Opt-in rclone Google Drive setup/teardown for Colab SSH (disabled by default)
+│   └── gh-release-upload-resilient.sh # Sequential GitHub Release asset uploader hardened for slow/unstable links
 └── downloads/
     ├── colab-archive-dl.sh    # Batch Archive.org downloader to Google Drive via Colab CLI SSH (--filter, --max-gb, --cookie, auto-cleanup)
     ├── dl-gdrive-resilient.py # Resilient Google Drive downloader (folder/split parts, cookie sync, range resume & auto-join)
@@ -28,6 +29,7 @@ make run-dl-tubi          # run scripts/downloads/dl-tubi.sh
 make run-hls-local        # run scripts/downloads/hls-local.sh
 make run-colab-godot-build # run scripts/utils/colab-godot-build.sh
 make run-colab-rclone     # run scripts/utils/colab-rclone.sh (opt-in rclone for Colab)
+make run-gh-release-upload-resilient # run scripts/utils/gh-release-upload-resilient.sh
 
 make setup-vps            # first-time: create .sync-vps/.env from template
 make pull-vps             # VPS → local scripts/
@@ -58,6 +60,7 @@ make run-dl-tubi
 |---|---|---|
 | [utils/colab-godot-build.sh](utils/colab-godot-build.sh) | `make run-colab-godot-build` | Clones a Godot Git repository on Google Colab via CLI SSH, installs headless Godot + export templates + Android debug signing (`apksigner`/`debug.keystore`), exports Android (`.apk`), Windows (`.exe`), or Linux builds, verifies SHA-256 checksums, copies outputs to Google Drive, flushes FUSE (`drive.flush_and_unmount()`), and stops the session. |
 | [utils/colab-rclone.sh](utils/colab-rclone.sh) | `make run-colab-rclone` | Optional, disabled-by-default helper to configure (`--enable`) or remove (`--disable`) `rclone` Google Drive access on an active Colab SSH VM. Requires explicit user permission (`--enable` / `ENABLE_COLAB_RCLONE=1` + interactive `YES` confirmation) before copying `rclone.conf`. |
+| [utils/gh-release-upload-resilient.sh](utils/gh-release-upload-resilient.sh) | `make run-gh-release-upload-resilient` | Sequential GitHub Release asset uploader hardened for slow/unstable connections: uses `curl` over HTTP/1.1 with keepalive, no total timeout, stall detection (`--speed-limit`/`--speed-time`), automatic cleanup of partial `starter` assets, retries with backoff, optional `--status-file`, and post-upload byte-size verification. |
 
 ---
 

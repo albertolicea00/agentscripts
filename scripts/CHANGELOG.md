@@ -7,6 +7,11 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-23
+
+- Added: `scripts/utils/gh-release-upload-resilient.sh` — sequential GitHub Release asset uploader hardened for slow/unstable connections (`curl --http1.1`, keepalive, stall detection, partial `starter` asset cleanup, retries with backoff, status file output, and post-upload size verification).
+- Changed: `scripts/README.md` — documented `scripts/utils/gh-release-upload-resilient.sh` (`make run-gh-release-upload-resilient`).
+
 ## 2026-11-21
 
 - Added: `scripts/utils/colab-godot-build.sh` — clone any Godot Git repository on Google Colab via CLI SSH, export debug/release Android (`.apk`), Windows (`.exe`), or Linux builds, verify SHA-256 checksums, copy outputs to Google Drive, flush FUSE (`drive.flush_and_unmount()`), and stop the session.
