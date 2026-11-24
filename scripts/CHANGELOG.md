@@ -7,6 +7,10 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-24
+
+- Fixed: `scripts/utils/gh-release-upload-resilient.sh` — handle transient `api.github.com` disconnects gracefully inside the retry loop instead of aborting on `gh api` errors during pre-upload asset inspection/cleanup.
+
 ## 2026-11-23
 
 - Fixed: `scripts/utils/gh-release-upload-resilient.sh` — read piped `gh api` JSON via `python3 -c` instead of `python3 - <<'PY'` so stdin is not consumed by the heredoc.

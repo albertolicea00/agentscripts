@@ -121,8 +121,10 @@ UPLOAD_BASE="https://uploads.github.com/repos/${REPO}/releases/${RELEASE_ID}/ass
 log "Release ID: ${RELEASE_ID}"
 
 get_remote_asset_info() {
-  local name="$1"
-  gh api "repos/${REPO}/releases/${RELEASE_ID}/assets?per_page=100" | python3 -c '
+  local name="$1" raw
+  raw="$(gh api "repos/${REPO}/releases/${RELEASE_ID}/assets?per_page=100" 2>/dev/null)" || return 1
+  [[ -n "$raw" ]] || return 1
+  python3 -c '
 import json, sys
 target = sys.argv[1]
 assets = json.load(sys.stdin)
@@ -134,7 +136,7 @@ for a in assets:
         print(f"{aid}|{st}|{sz}")
         sys.exit(0)
 print("")
-' "$name"
+' "$name" <<<"$raw"
 }
 
 delete_remote_asset() {
@@ -166,7 +168,20 @@ for FILE_PATH in "${FILES[@]}"; do
 
   UPLOADED=0
   for (( ATTEMPT=1; ATTEMPT<=RETRIES; ATTEMPT++ )); do
+    set +e
     EXISTING="$(get_remote_asset_info "$FILE_NAME")"
+    INFO_RC=$?
+    set -e
+    if [[ "$INFO_RC" -ne 0 ]]; then
+      log "WARNING: Could not query existing assets (network/API error) before attempt ${ATTEMPT}/${RETRIES}."
+      write_status "api_unreachable" "$FILE_NAME" "$ATTEMPT" "Failed to query existing assets"
+      if (( ATTEMPT < RETRIES )); then
+        SLEEP_SEC=$(( RETRY_DELAY * ATTEMPT ))
+        log "Waiting ${SLEEP_SEC}s before retry..."
+        sleep "$SLEEP_SEC"
+      fi
+      continue
+    fi
     if [[ -n "$EXISTING" ]]; then
       IFS='|' read -r ASSET_ID ASSET_STATE ASSET_SIZE <<<"$EXISTING"
       if [[ "$ASSET_STATE" == "uploaded" && "$ASSET_SIZE" == "$LOCAL_SIZE" && "$CLOBBER" -eq 0 ]]; then
@@ -174,12 +189,27 @@ for FILE_PATH in "${FILES[@]}"; do
         write_status "skipped_already_uploaded" "$FILE_NAME" "$ATTEMPT" "Already uploaded (${LOCAL_SIZE} bytes)"
         UPLOADED=1
         break
-      elif [[ "$ASSET_STATE" != "uploaded" ]]; then
-        delete_remote_asset "$ASSET_ID" "incomplete state='${ASSET_STATE}'"
-      elif [[ "$CLOBBER" -eq 1 ]]; then
-        delete_remote_asset "$ASSET_ID" "--clobber requested"
       else
-        delete_remote_asset "$ASSET_ID" "size mismatch remote=${ASSET_SIZE} local=${LOCAL_SIZE}"
+        local_reason="size mismatch remote=${ASSET_SIZE} local=${LOCAL_SIZE}"
+        if [[ "$ASSET_STATE" != "uploaded" ]]; then
+          local_reason="incomplete state='${ASSET_STATE}'"
+        elif [[ "$CLOBBER" -eq 1 ]]; then
+          local_reason="--clobber requested"
+        fi
+        set +e
+        delete_remote_asset "$ASSET_ID" "$local_reason"
+        DEL_RC=$?
+        set -e
+        if [[ "$DEL_RC" -ne 0 ]]; then
+          log "WARNING: Failed to delete remote asset id=${ASSET_ID} (network/API error)."
+          write_status "api_unreachable" "$FILE_NAME" "$ATTEMPT" "Failed to delete remote asset"
+          if (( ATTEMPT < RETRIES )); then
+            SLEEP_SEC=$(( RETRY_DELAY * ATTEMPT ))
+            log "Waiting ${SLEEP_SEC}s before retry..."
+            sleep "$SLEEP_SEC"
+          fi
+          continue
+        fi
       fi
     fi
 
