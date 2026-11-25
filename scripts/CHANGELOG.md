@@ -9,6 +9,7 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ## 2026-11-25
 
+- Changed: `scripts/utils/colab-gh-release-upload.sh` — added persistent per-chunk checkpointing to a hidden temporary GitHub Draft Release (auto-cleaned on completion), automatic Colab staging directory re-initialization after VM resets, and reduced `rsync --timeout` to 60s.
 - Added: `scripts/utils/colab-gh-release-upload.sh` — resumable GitHub Release uploader via Google Colab CLI SSH (chunked `rsync --partial --inplace`, per-part and full SHA-256 verification, and fast datacenter upload to GitHub Releases).
 - Changed: `scripts/README.md` — documented `scripts/utils/colab-gh-release-upload.sh` (`make run-colab-gh-release-upload`).
 
