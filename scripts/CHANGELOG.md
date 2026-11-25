@@ -7,6 +7,11 @@ Format: `Added | Changed | Fixed | Removed` under each date.
 
 ---
 
+## 2026-11-25
+
+- Added: `scripts/utils/colab-gh-release-upload.sh` — resumable GitHub Release uploader via Google Colab CLI SSH (chunked `rsync --partial --inplace`, per-part and full SHA-256 verification, and fast datacenter upload to GitHub Releases).
+- Changed: `scripts/README.md` — documented `scripts/utils/colab-gh-release-upload.sh` (`make run-colab-gh-release-upload`).
+
 ## 2026-11-24
 
 - Fixed: `scripts/utils/gh-release-upload-resilient.sh` — handle transient `api.github.com` disconnects gracefully inside the retry loop instead of aborting on `gh api` errors during pre-upload asset inspection/cleanup.
